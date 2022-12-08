@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us"><head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="generator" content="Hugo 0.48">
+
+  
+  <meta property="og:title" content="STM32 &amp; OpenCM3 Part 3: CANBus">
+<meta property="og:description" content="What CANBus is, how to terminate the bus and code for sending and receiving CAN messages on the STM32">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rhye.org/post/stm32-with-opencm3-3-canbus/">
+<meta property="og:image" content="https://rhye.org/img/stm32-with-opencm3-3/demo_board_running.png">
+<meta property="article:published_time" content="2019-04-06T14:46:51-04:00">
+<meta property="article:modified_time" content="2019-04-06T14:46:51-04:00">
+
+  
+  <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rhye.org/img/stm32-with-opencm3-3/demo_board_running.png">
+
+<meta name="twitter:title" content="STM32 &amp; OpenCM3 Part 3: CANBus">
+<meta name="twitter:description" content="What CANBus is, how to terminate the bus and code for sending and receiving CAN messages on the STM32">
+
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  
+  <title>STM32 &amp; OpenCM3 Part 3: CANBus · rhye.org</title>
+  
+
+  
+  <link rel="stylesheet" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/poole.css">
+  <link rel="stylesheet" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/syntax.css">
+  <link rel="stylesheet" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/hyde.css">
+  <link rel="stylesheet" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/css.css">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://rhye.org/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="https://rhye.org/favicon.png">
+
+  
+  <link href="" rel="alternate" type="application/rss+xml" title="rhye.org">
+
+  
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-92643562-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async="" src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/analytics.js"></script>
+
+<script type="text/javascript" async="" src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/embed.js"></script><link rel="prefetch" as="style" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_data_004/lounge.9772024640e1cec8d973cd80fb62abd8.css"><link rel="prefetch" as="script" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_data_004/common.bundle.33bc87b2c4f9324203cc85b7dd1d0492.js"><link rel="prefetch" as="script" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_data_004/lounge.bundle.4a4252944de4199d2e7f3e9e3eb9bc54.js"><link rel="prefetch" as="script" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_data_004/config.js"><script async="" id="dsq_recs_scr" src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/recommendations.js"></script><link rel="prefetch" as="style" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_data_003/recommendations.10022a97346f1c6e3798931bbd8e4bb5.css"><link rel="prefetch" as="script" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_data_003/common.bundle.a59fbd11efae764ccd959d61e4925fee.js"><link rel="prefetch" as="script" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_data_003/recommendations.bundle.926bc472e4859a48daa346b4ba2ab4f4.js"><link rel="prefetch" as="script" href="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_data_004/config.js"><script src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/alfie_v4.63f1ab6d6b9d5807dc0c94ef3fe0b851.js" async="" charset="UTF-8"></script></head>
+
+	<body class=" ">
+		<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <a class="site_title" href="https://rhye.org/">rhye.org</a>
+      <p class="lead">
+       programming blog 
+      </p>
+      
+      <p class="author">
+      by Ross Schlaikjer
+      </p>
+      
+    </div>
+
+    <ul class="sidebar-nav">
+      <li><a href="https://rhye.org/">Home</a> </li>
+      
+    </ul>
+
+    <a href="mailto:ross@schlaikjer.com">✉ Email</a>
+    <br>
+    <a href="https://twitter.com/rschlaikjer" target="_blank">🐦 Twitter</a>
+    <p>© 2021. All rights reserved. </p>
+  </div>
+</div>
+
+
+		<div class="content container">
+			<div class="post">
+			 	<h1>STM32 &amp; OpenCM3 Part 3: CANBus</h1>
+			  <span class="post-date">Sat, Apr 6, 2019</span>
+              
+              <span class="github-header">Companion code for this post available on <a target="_blank" href="https://github.com/rschlaikjer/hello-stm32-3-canbus">Github</a></span>
+              
+			      
+
+<p>This is the fourth post in a series on the STM32 series of MCUs and
+libopencm3. The previous post, on SPI and DMA, can be found
+<a href="https://rhye.org/post/stm32-with-opencm3-2-spi-and-dma/">here</a>.</p>
+
+<h3 id="what-is-canbus">What is CANBus?</h3>
+
+<p>The CAN bus is a multi-master, low data rate bus for communicating between
+controllers in environments with potentially high EMI. Initially designed for
+automotive applications, it is becoming increasingly used in general automation
+environments as well as by hobbyists. Electrically, CAN uses a differential
+pair of signals, <code>CANH</code> and <code>CANL</code>, to send data on the bus. In order to transmit a
+logic ‘1’ (also known as ‘recessive’ in CAN parlance), the differential voltage
+of the lines is left at 0.
+To transmit a logic ‘0’ (dominant), the voltage between the lines is
+driven high. This means that any node transmitting a 0 will <em>override</em> the
+transmission of a node that is simultaneously trying to transmit a 1.
+It is this mechanism that allows for the priority system in a CAN
+network - since each CAN message begins with the message ID, starting from the
+MSB, any controller asserting a logic ‘0’ on the bus will clobber a controller
+attempting to transmit a logic ‘1’. Since all transmitters read the bus as they
+transmit, this clobbering can be detected by the controller with the lower
+priority transmission, which will back off until the bus is clear again. This
+protocol is therefore categorized as ‘CSMA/CD+AMP’, or Carrier Sense Multiple
+Access / Collision Detection + Arbitration on Message Priority.</p>
+
+
+<center>
+<figure>
+    
+        <img src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/can_signalling.png">
+    
+    
+    <figcaption>
+        <h4>CAN Signalling, courtesy of Wikipedia</h4>
+        
+    </figcaption>
+    
+</figure>
+</center>
+
+
+
+<h3 id="why-would-i-use-can">Why would I use CAN?</h3>
+
+<p>When transferring data between two microcontroller systems, people are probably
+already familiar with I2C and SPI, which are commonly used for low (I2C,
+100-400kHz) or high (SPI, 100MHz+) speed data transfer between ICs. However,
+both of these protocols are really intended for operation over a short
+distance, ideally on the same board. Running I2C or SPI off-board, even for
+relatively short distances, can start to result in bit errors at higher speeds
+or in the presence of interference.
+The electrical integrity problems with I2C and SPI can be alleviated by using
+<a href="https://en.wikipedia.org/wiki/Differential_signaling">differential signals</a>,
+as is the case with RS422/485. This allows RS485 to transmit data at high
+(multiple megabit) speeds over distances of 300-900 feet. This might satisfy
+our reliability or distance requirements, but none of these protocols bake in
+support for multi-master communication - SPI is very strongly based around a
+single-master design, and while I2C does allow for multiple devices to control
+the bus, there is no built-in arbitration support. Similarly for RS485, the
+application developer must roll their own packet structure and arbitration to
+handle bus contention.</p>
+
+<p>CANBus performs quite well on some of these points, being:</p>
+
+<ul>
+<li>Differential for signal integrity</li>
+<li>Inherently multi-master</li>
+<li>Low component count (single transceiver IC + termination)</li>
+<li>Available in MCUs costing as little as a dollar</li>
+<li>Checksummed for data integrity</li>
+</ul>
+
+<p>However, CANbus does have some drawbacks that make it a poor fit for other
+applications. These include:</p>
+
+<ul>
+<li>Very limited packet size of 8 bytes</li>
+<li>Maximum bus frequency much lower then SPI or RS485</li>
+<li>Maximum bus size of ~64 nodes</li>
+<li>Termination may need to be adjusted as nodes are added/removed</li>
+</ul>
+
+<p>When deciding whether or not to use CAN, be sure to think carefully about the
+requirements of your application and whether or not CAN is the best fit.</p>
+
+<h3 id="electrical-specifications">Electrical specifications</h3>
+
+<p>For ‘High speed’ CAN (~512 Kbps), all
+controllers (nodes) in the system must be connected to a linear bus, with
+appropriate termination. This is to mitigate signal
+reflections, which can cause bit errors at receiving nodes. This does however
+mean that CAN buses can be slightly more work to add or remove nodes from,
+compared to systems that allow a ‘star’ topology (e.g. an ethernet switch).
+Instead each node must be connected directly to a previous node and to a
+subsequent node, or, in the case of the last node on either end, a terminating
+resistor of 120 ohms.</p>
+
+<p>If one is willing to sacrifice some speed, ‘fault tolerant’ CAN (~128 Kbps)
+<em>can</em> be operated in a star topology, with the termination divided up and
+placed at each node. For more information, the
+<a href="https://en.wikipedia.org/wiki/CAN_bus#Physical">Wikipedia page</a>
+on CAN has some diagrams.</p>
+
+<p>As an example implementation, I have created a small demo board in KiCad with
+switchable termination to be used for high-speed CAN communication. The design
+files are available
+<a href="https://github.com/rschlaikjer/hello-stm32-3-canbus/tree/master/hardware">here</a>
+if you are interested in producing some yourself, or you can directly order
+them from PCBway
+<a href="https://www.pcbway.com/project/shareproject/CANBus_Demo_Board.html">here</a>.</p>
+
+
+<center>
+<figure>
+    
+        <img src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/demo_board.png">
+    
+    
+    <figcaption>
+        <h4>CAN Demo Board using STM32F091</h4>
+        
+    </figcaption>
+    
+</figure>
+</center>
+
+
+
+<h3 id="message-format">Message format</h3>
+
+<p>CAN frames follow a defined format: all standard frames have an 11-bit
+identifier and up to 8 bytes of data. Extended frames allow 29 bit identifiers,
+but only the same 8 bytes of data. CAN frames also include checksums, and most
+CAN implementations in microcontrollers will automatically insert / verify
+checksums in hardware. The appearance on the wire of CAN frames is as follows:</p>
+
+
+<center>
+<figure>
+    
+        <img src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/can_frame.png">
+    
+    
+    <figcaption>
+        <h4>CAN frame formats</h4>
+        
+    </figcaption>
+    
+</figure>
+</center>
+
+
+
+<ul>
+<li>SOF: Start of frame bit (dominant). Used for synchronization.</li>
+<li>Identifier: The 11bit (standard) or 29 bit (extended) message ID</li>
+<li>RTR: Request to Transmit. Can be used by the application to indicate it wants
+another device to transmit.</li>
+<li>IDE: Whether or not this is an extended CAN frame. The IDE bit is 0
+(dominant) for standard frames and 1 (recessive) for extended frames, thus
+making all standard frames higher priority than extended frames.</li>
+<li>DLC: Data length code. A 4 bit integer indicating the number of data bytes.</li>
+<li>Data. Data may be between 0 and 8 bytes for both standard and extended
+frames.</li>
+<li>CRC: 16-bit checksum for the frame data.</li>
+<li>ACK: When transmitting, the controller leaves the bus in a recessive state
+during the ACK bit. If any other device on the bus has received the
+just-transmitted frame and considers it valid, it will assert the bus during
+this bit, and the transmitter can know that the message was successfully
+transmitted.</li>
+<li>EOF / IFS: End of frame / interframe separator.</li>
+</ul>
+
+<p>As may be clear from the 8 byte max payload size, CAN is not a good choice for
+applications that need to transfer large quantities of data. Instead it is much
+more suited for controls and small sensor data.</p>
+
+<div class="postit">
+    <p>N.B: The ‘RTR’ bit in a CAN message is <strong>mutually exclusive</strong> with the data segment.</p>
+
+<p>If you set the RTR bit, you may still specify a data length code (DLC) but the
+peripheral <strong>will not</strong> transmit any data bytes. Be careful when receiving
+frames that you ignore any data bytes ‘received’ in RTR frames, as they will
+simply be junk memory, which can led to pernicious bugs.</p>
+
+</div>
+
+
+<h3 id="using-can-with-libopencm3">Using CAN with libopencm3</h3>
+
+<p>Now that we have an understanding of the CAN bus architecture, let’s actually
+build a small application that will send and receive data on the bus.
+Setting up the basics is relatively straightforward with a call to
+<a href="http://libopencm3.org/docs/latest/stm32f0/html/group__can__defines.html#ga801fb4aace625ef7270c1eb0944c9578">can_init()</a>:</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C++" data-lang="C++"><span style="color:#080;font-style:italic">// Enable clock to the CAN peripheral
+</span><span style="color:#080;font-style:italic"></span>rcc_periph_clock_enable(RCC_CAN1);
+
+<span style="color:#080;font-style:italic">// Reset the can peripheral
+</span><span style="color:#080;font-style:italic"></span>can_reset(CAN1);
+
+<span style="color:#080;font-style:italic">// Initialize the can peripheral
+</span><span style="color:#080;font-style:italic"></span><span style="color:#a2f;font-weight:bold">auto</span> success <span style="color:#666">=</span> can_init(
+    CAN1, <span style="color:#080;font-style:italic">// The can ID
+</span><span style="color:#080;font-style:italic"></span>
+    <span style="color:#080;font-style:italic">// Time Triggered Communication Mode?
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// <a class="vglnk" href="http://www.datamicro.ru/download/iCC_07_CANNetwork_with_Time_Trig_Communication" rel="nofollow"><span>http</span><span>://</span><span>www</span><span>.</span><span>datamicro</span><span>.</span><span>ru</span><span>/</span><span>download</span><span>/</span><span>iCC</span><span>_</span><span>07</span><span>_</span><span>CANNetwork</span><span>_</span><span>with</span><span>_</span><span>Time</span><span>_</span><span>Trig</span><span>_</span><span>Communication</span></a>.  pdf
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">false</span>, <span style="color:#080;font-style:italic">// No TTCM
+</span><span style="color:#080;font-style:italic"></span>
+    <span style="color:#080;font-style:italic">// Automatic bus-off management?
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// When the bus error counter hits 255, the CAN will automatically
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// remove itself from the bus. if ABOM is disabled, it won't
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// reconnect unless told to. If ABOM is enabled, it will recover the
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// bus after the recovery sequence.
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">true</span>, <span style="color:#080;font-style:italic">// Yes ABOM
+</span><span style="color:#080;font-style:italic"></span>
+    <span style="color:#080;font-style:italic">// Automatic wakeup mode?
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// 0: The Sleep mode is left on software request by clearing the SLEEP
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// bit of the CAN_MCR register.
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// 1: The Sleep mode is left automatically by hardware on CAN
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// message detection.
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">true</span>, <span style="color:#080;font-style:italic">// Wake up on message rx
+</span><span style="color:#080;font-style:italic"></span>
+    <span style="color:#080;font-style:italic">// No automatic retransmit?
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// If true, will not automatically attempt to re-transmit messages on
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// error
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">false</span>, <span style="color:#080;font-style:italic">// Do auto-retry
+</span><span style="color:#080;font-style:italic"></span>
+    <span style="color:#080;font-style:italic">// Receive FIFO locked mode?
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// If the FIFO is in locked mode,
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">//  once the FIFO is full NEW messages are discarded
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// If the FIFO is NOT in locked mode,
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">//  once the FIFO is full OLD messages are discarded
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">false</span>, <span style="color:#080;font-style:italic">// Discard older messages over newer
+</span><span style="color:#080;font-style:italic"></span>
+    <span style="color:#080;font-style:italic">// Transmit FIFO priority?
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// This bit controls the transmission order when several mailboxes are
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// pending at the same time.
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// 0: Priority driven by the identifier of the message
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// 1: Priority driven by the request order (chronologically)
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">false</span>, <span style="color:#080;font-style:italic">// TX priority based on identifier
+</span><span style="color:#080;font-style:italic"></span>
+    <span style="color:#080;font-style:italic">//// Bit timing settings
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">//// Assuming 48MHz base clock, 87.5% sample point, 500 kBit/s data rate
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">//// <a class="vglnk" href="http://www.bittiming.can-wiki.info/" rel="nofollow"><span>http</span><span>://</span><span>www</span><span>.</span><span>bittiming</span><span>.</span><span>can</span><span>-</span><span>wiki</span><span>.</span><span>info</span><span>/</span></a>
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// Resync time quanta jump width
+</span><span style="color:#080;font-style:italic"></span>    CAN_BTR_SJW_1TQ, <span style="color:#080;font-style:italic">// 16,
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// Time segment 1 time quanta width
+</span><span style="color:#080;font-style:italic"></span>    CAN_BTR_TS1_11TQ, <span style="color:#080;font-style:italic">// 13,
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// Time segment 2 time quanta width
+</span><span style="color:#080;font-style:italic"></span>    CAN_BTR_TS2_4TQ, <span style="color:#080;font-style:italic">// 2,
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// Baudrate prescaler
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#666">6</span>,
+
+    <span style="color:#080;font-style:italic">// Loopback mode
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// If set, CAN can transmit but not receive
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">false</span>,
+
+    <span style="color:#080;font-style:italic">// Silent mode
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// If set, CAN can receive but not transmit
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">false</span>);
+
+<span style="color:#080;font-style:italic">// Enable CAN interrupts for FIFO message pending (FMPIE)
+</span><span style="color:#080;font-style:italic"></span>can_enable_irq(CONTROLLER_CAN, CAN_IER_FMPIE0 <span style="color:#666">|</span> CAN_IER_FMPIE1);
+nvic_enable_irq(NVIC_CEC_CAN_IRQ);
+
+<span style="color:#080;font-style:italic">// Route the CAN signal to our selected GPIOs
+</span><span style="color:#080;font-style:italic"></span><span style="color:#a2f;font-weight:bold">const</span> uint16_t pins <span style="color:#666">=</span> GPIO11 <span style="color:#666">|</span> GPIO12;
+gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, pins);
+gpio_set_af(GPIOA, GPIO_AF4, pins);
+</code></pre></div>
+<p>In order to receive messages, in our CAN ISR we need to check to see which FIFO
+has pending data, and can then read off the message. For this demo, we’ll just
+put all of the messages in the same queue to be processed later.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C++" data-lang="C++"><span style="color:#0b0;font-weight:bold">void</span> <span style="color:#00a000">cec_can_isr</span>(<span style="color:#0b0;font-weight:bold">void</span>) {
+    <span style="color:#080;font-style:italic">// Message pending on FIFO 0?
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f;font-weight:bold">if</span> (CAN_RF0R(CONTROLLER_CAN) <span style="color:#666">&amp;</span> CAN_RF0R_FMP0_MASK) {
+        receive(<span style="color:#666">0</span>);
+    }
+
+    <span style="color:#080;font-style:italic">// Message pending on FIFO 1?
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f;font-weight:bold">if</span> (CAN_RF1R(CONTROLLER_CAN) <span style="color:#666">&amp;</span> CAN_RF1R_FMP1_MASK) {
+        receive(<span style="color:#666">1</span>);
+    }
+}
+
+<span style="color:#0b0;font-weight:bold">void</span> <span style="color:#00a000">receive</span>(uint8_t fifo) {
+    <span style="color:#080;font-style:italic">// Copy CAN message data into main ram
+</span><span style="color:#080;font-style:italic"></span>    Frame frame;
+    can_receive(CAN1,
+                fifo, <span style="color:#080;font-style:italic">// FIFO id
+</span><span style="color:#080;font-style:italic"></span>                <span style="color:#a2f">true</span>, <span style="color:#080;font-style:italic">// Automatically release FIFO after rx
+</span><span style="color:#080;font-style:italic"></span>                <span style="color:#666">&amp;</span>frame.id, <span style="color:#666">&amp;</span>frame.extended_id, <span style="color:#666">&amp;</span>frame.rtr, <span style="color:#666">&amp;</span>frame.filter_id,
+                <span style="color:#666">&amp;</span>frame.len, frame.data, <span style="color:#666">&amp;</span>frame.ts);
+
+    <span style="color:#080;font-style:italic">// Push the received frame onto a queue to be handled later
+</span><span style="color:#080;font-style:italic"></span>    msg_queue.push(frame);
+}
+</code></pre></div>
+<h3 id="filters">Filters</h3>
+
+<p>So far, our application will receive and try to store all messages that appear
+on the bus. But for many applications, we may be able to ignore a lot of
+messages, and save ourselves some CPU time. To this end, the CAN peripheral on
+the STM32F091 has a series of filter banks that can be used to selectively
+accept different message types. The general structure of the filters is that
+you have an ID register used to input the data you want to match against, and
+then a mask register that defines which bits of ID register are to be matched.
+This can be a bit complex at first glance - let’s take a look at the relevant
+figure in the ST reference manual:</p>
+
+
+<center>
+<figure>
+    
+        <img src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/filter_banks.png">
+    
+    
+    <figcaption>
+        <h4>Filter Bank Configuration</h4>
+        
+    </figcaption>
+    
+</figure>
+</center>
+
+
+
+<p>As an example, let’s say that we have a device that only wants to receive
+two types of message:</p>
+
+<ul>
+<li>Messages with an ID less than 256, all of which are system broadcast messages</li>
+<li>Messages with an ID of 342 and the RTR bit set</li>
+</ul>
+
+<p>Since these are both standard frames, we can use 16 bit filters, to save space.
+From figure 315 we can see that the first 11 bits of the register match
+against the ID, and bit 4 in the lower byte matches the RTR flag in the CAN
+message. So for our first filter, we want to assert that the message ID is &lt;=
+255. Since 255 is 0xFF, or 8 bits set, we know that any ID numbers above 255
+will have one of bits 9-11 set. So to match only lower IDs, we can assert
+that the top three bits of the ID are zero. So for our first filter, we can
+create it like so:</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C++" data-lang="C++"><span style="color:#a2f;font-weight:bold">const</span> uint16_t id1 <span style="color:#666">=</span> <span style="color:#666">0</span>;               <span style="color:#080;font-style:italic">// We want to assert the high bits are zero
+</span><span style="color:#080;font-style:italic"></span><span style="color:#a2f;font-weight:bold">const</span> uint16_t mask1 <span style="color:#666">=</span> (<span style="color:#666">0</span>b111 <span style="color:#666">&lt;&lt;</span> <span style="color:#666">12</span>); <span style="color:#080;font-style:italic">// The only bits we want to compare are STDID[10:8]
+</span><span style="color:#080;font-style:italic"></span></code></pre></div>
+<p>For our second filter, we want to match the ID <em>exactly</em>, so we will load our
+ID register with our actual desired message value (342) and in our mask we will
+select all bits of the STDID field. Since we want to assert that the RTR field
+is also set, we will likewise place a 1 both the ID and MASK registers at bit
+5, like so:</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C++" data-lang="C++"><span style="color:#a2f;font-weight:bold">const</span> uint16_t id1 <span style="color:#666">=</span> (
+    (<span style="color:#666">342</span> <span style="color:#666">&lt;&lt;</span> <span style="color:#666">5</span>) <span style="color:#666">|</span> <span style="color:#080;font-style:italic">// STDID
+</span><span style="color:#080;font-style:italic"></span>    (<span style="color:#666">1</span> <span style="color:#666">&lt;&lt;</span> <span style="color:#666">4</span>)     <span style="color:#080;font-style:italic">// RTR
+</span><span style="color:#080;font-style:italic"></span>);
+<span style="color:#a2f;font-weight:bold">const</span> uint16_t mask1 <span style="color:#666">=</span> (
+    (<span style="color:#666">0</span>b11111111111 <span style="color:#666">&lt;&lt;</span> <span style="color:#666">5</span>) <span style="color:#666">|</span> <span style="color:#080;font-style:italic">// Match all 11 bits of STDID
+</span><span style="color:#080;font-style:italic"></span>    (<span style="color:#666">1</span> <span style="color:#666">&lt;&lt;</span> <span style="color:#666">4</span>)               <span style="color:#080;font-style:italic">// Match the RTR bit
+</span><span style="color:#080;font-style:italic"></span>);
+</code></pre></div>
+<p>Once we have our filters, we can configure the CAN peripheral with them like
+so. All messages that match either of these filters will be placed into FIFO 0.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C++" data-lang="C++"><span style="color:#080;font-style:italic">// Create a filter mask that passes all critical broadcast &amp; command
+</span><span style="color:#080;font-style:italic">// CAN messages
+</span><span style="color:#080;font-style:italic"></span>can_filter_id_mask_16bit_init(
+    <span style="color:#666">0</span>,          <span style="color:#080;font-style:italic">// Filter number
+</span><span style="color:#080;font-style:italic"></span>    id1, mask1, <span style="color:#080;font-style:italic">// Our first filter
+</span><span style="color:#080;font-style:italic"></span>    id2, mask2  <span style="color:#080;font-style:italic">// Our second filter
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#666">0</span>,          <span style="color:#080;font-style:italic">// FIFO 0
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#a2f">true</span>);      <span style="color:#080;font-style:italic">// Enable
+</span><span style="color:#080;font-style:italic"></span></code></pre></div>
+<h3 id="putting-it-together">Putting it together</h3>
+
+<p>Now that we have our CAN peripheral initialized, let’s write a simple demo
+application. We’ll use the demo board mentioned above (which you can order
+directly from PCBWay
+<a href="https://www.pcbway.com/project/shareproject/CANBus_Demo_Board.html">here</a>)
+to create a simple program that forwards bytes from the UART over the CAN
+bus. In our main application loop, we’ll first take any characters that have
+been received over the UART and transmit them over CAN. (Implementation details
+of the <code>Frame</code> class can be seen
+<a href="https://github.com/rschlaikjer/hello-stm32-3-canbus/blob/master/include/can.hpp#L11-L42">here</a>
+for those curious.)</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C++" data-lang="C++">  <span style="color:#080;font-style:italic">// Loop over any characters pending in the UART Rx buffer,
+</span><span style="color:#080;font-style:italic"></span>  <span style="color:#080;font-style:italic">// and send each one over the CAN bus as a single message.
+</span><span style="color:#080;font-style:italic"></span>  <span style="color:#0b0;font-weight:bold">char</span> c;
+  <span style="color:#a2f;font-weight:bold">while</span> (Uart<span style="color:#666">::</span>get(<span style="color:#666">&amp;</span>c)) {
+    <span style="color:#080;font-style:italic">// Turn on our activity LED
+</span><span style="color:#080;font-style:italic"></span>    gpio_set(GPIOB, GPIO12);
+    <span style="color:#080;font-style:italic">// Echo this character back to the serial console so we can see what
+</span><span style="color:#080;font-style:italic"></span>    <span style="color:#080;font-style:italic">// we've typed
+</span><span style="color:#080;font-style:italic"></span>    Uart<span style="color:#666">::</span>put(c);
+    <span style="color:#080;font-style:italic">// Create a new CAN Frame holder
+</span><span style="color:#080;font-style:italic"></span>    CAN<span style="color:#666">::</span>Frame frame;
+    frame.id <span style="color:#666">=</span> <span style="color:#666">1</span>; <span style="color:#080;font-style:italic">// Our message ID
+</span><span style="color:#080;font-style:italic"></span>    frame.extended_id <span style="color:#666">=</span> <span style="color:#a2f">false</span>; <span style="color:#080;font-style:italic">// This is not an extended ID
+</span><span style="color:#080;font-style:italic"></span>    frame.rtr <span style="color:#666">=</span> <span style="color:#a2f">false</span>; <span style="color:#080;font-style:italic">// This is not a request to transmit
+</span><span style="color:#080;font-style:italic"></span>    frame.len <span style="color:#666">=</span> <span style="color:#666">1</span>; <span style="color:#080;font-style:italic">// We intend to send one data byte
+</span><span style="color:#080;font-style:italic"></span>    frame.data[<span style="color:#666">0</span>] <span style="color:#666">=</span> c; <span style="color:#080;font-style:italic">// Our uart character is the first datum
+</span><span style="color:#080;font-style:italic"></span>    CAN<span style="color:#666">::</span>transmit(frame); <span style="color:#080;font-style:italic">// Send the frame to the CAN output mailbox
+</span><span style="color:#080;font-style:italic"></span>    gpio_clear(GPIOB, GPIO12); <span style="color:#080;font-style:italic">// Clear our activity LED
+</span><span style="color:#080;font-style:italic"></span>  }
+</code></pre></div>
+<p>We also need to receive frames off the bus and display the data. The receive
+interrupt we wrote earlier will queue the frames, so we can pop them off in
+order and print out the details.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C++" data-lang="C++">  <span style="color:#080;font-style:italic">// Loop over any CAN frames pending in the CAN buffer, and print out
+</span><span style="color:#080;font-style:italic"></span>  <span style="color:#080;font-style:italic">// the ID of the message and all the data bytes.
+</span><span style="color:#080;font-style:italic"></span>  CAN<span style="color:#666">::</span>Frame frame;
+  <span style="color:#a2f;font-weight:bold">while</span> (CAN<span style="color:#666">::</span>pop(frame)) {
+    <span style="color:#080;font-style:italic">// Turn on our CAN activity LED
+</span><span style="color:#080;font-style:italic"></span>    gpio_set(GPIOB, GPIO13);
+    <span style="color:#080;font-style:italic">// Print the frame ID and all data bytes as hex and plain characters
+</span><span style="color:#080;font-style:italic"></span>    printf(<span style="color:#b44">"Rx ID: %u Data: "</span>, frame.id);
+    <span style="color:#a2f;font-weight:bold">for</span> (<span style="color:#0b0;font-weight:bold">int</span> i <span style="color:#666">=</span> <span style="color:#666">0</span>; i <span style="color:#666">&lt;</span> frame.len; i<span style="color:#666">++</span>) {
+      printf(<span style="color:#b44">"%02x:%c"</span>, frame.data[i], frame.data[i]);
+    }
+    printf(<span style="color:#b44">"</span><span style="color:#b62;font-weight:bold">\n</span><span style="color:#b44">"</span>);
+    <span style="color:#080;font-style:italic">// Turn off the activity LED
+</span><span style="color:#080;font-style:italic"></span>    gpio_clear(GPIOB, GPIO13);
+  }
+</code></pre></div>
+<p>The full firmware listing can be found
+<a href="https://github.com/rschlaikjer/hello-stm32-3-canbus/blob/master/src/main.cpp">here</a>.</p>
+
+<p>In order to test this, we can assemble two test boards and flash the same
+firmware to each. We can then connect the <code>CANH</code> and <code>CANL</code> pins of each board
+using jumpers, and configure the termination using jumpers. Since each board is
+connected to only one other board, we will set the jumper position for the
+connected header to pins 2-3, which connects the jumper pins directly to the
+transceiver. For the other set of jumpers, we select pins 1-2 to connect the
+terminating resistors (in this case a split termination of two 59 Ohm resistors
+and a 4.7nF capacitor) to the bus.</p>
+
+
+<center>
+<figure>
+    
+        <img src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/demo_board_running.png">
+    
+    
+    <figcaption>
+        <h4>Two demo boards connected up</h4>
+        
+    </figcaption>
+    
+</figure>
+</center>
+
+
+
+<p>Once the boards are connected, we can connect a USB to UART adapter to each
+one and try sending some data back and forth. If everything is working
+properly, typing into the console of one board will cause it to send characters
+over CAN to the other, and vice versa.</p>
+
+
+<center>
+<figure>
+    
+        <img src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/uart_over_can.png">
+    
+    
+    <figcaption>
+        <h4>Communicating over CANBus</h4>
+        
+    </figcaption>
+    
+</figure>
+</center>
+
+
+
+<p>This concludes our overview of CANBus, and the implementation details of the
+CAN peripheral on the STM32 series of microcontrollers. Using the basics in
+this post you should be able to create far more interesting applications.</p>
+
+<p>As per usual, the code for this post is available on
+<a href="https://github.com/rschlaikjer/hello-stm32-3-canbus">Github</a>.</p>
+
+			</div>
+
+            <h2>Comments</h2>
+            <div id="disqus_recommendations" style="margin-bottom: 12px;"><iframe id="dsq-app4830" name="dsq-app4830" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 100% !important; border: medium none !important; overflow: hidden !important; height: 269px !important; display: inline !important; box-sizing: border-box !important;" src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_003.html" horizontalscrolling="no" verticalscrolling="no" width="100%" frameborder="0"></iframe></div><div id="disqus_thread"><iframe id="dsq-app5694" name="dsq-app5694" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 1px !important; min-width: 100% !important; border: medium none !important; overflow: hidden !important; height: 531px !important;" src="STM32%20&amp;%20OpenCM3%20Part%203%20CANBus%20%C2%B7%20rhye_files/a_004.html" horizontalscrolling="no" verticalscrolling="no" width="100%" frameborder="0"></iframe></div>
+<script type="text/javascript">
+     
+    var disqus_shortname = 'blog-rhye-org'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+		
+
+  
+
+<iframe style="display: none;"></iframe><iframe style="display: none;"></iframe></body></html>

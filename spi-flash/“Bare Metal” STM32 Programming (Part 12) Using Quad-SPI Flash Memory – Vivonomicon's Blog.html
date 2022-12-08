@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html slick-uniqueid="3" lang="en-US"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+	<title>“Bare Metal” STM32 Programming (Part 12): Using Quad-SPI Flash Memory – Vivonomicon's Blog</title>
+<link rel="dns-prefetch" href="https://fonts.googleapis.com/">
+<link rel="dns-prefetch" href="https://s.w.org/">
+<link rel="alternate" type="application/rss+xml" title="Vivonomicon's Blog » Feed" href="https://vivonomicon.com/feed/">
+<link rel="alternate" type="application/rss+xml" title="Vivonomicon's Blog » Comments Feed" href="https://vivonomicon.com/comments/feed/">
+<link rel="alternate" type="application/rss+xml" title="Vivonomicon's Blog » “Bare Metal” STM32 Programming (Part 12): Using Quad-SPI Flash Memory Comments Feed" href="https://vivonomicon.com/2020/08/08/bare-metal-stm32-programming-part-12-using-quad-spi-flash-memory/feed/">
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/12.0.0-1\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/12.0.0-1\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/vivonomicon.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=5.4.12"}};
+			/*! This file is auto-generated */
+			!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){var a=String.fromCharCode;p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,e),0,0);e=i.toDataURL();return p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,t),0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(!p||!p.fillText)return!1;switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])?!1:!s([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!s([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]);case"emoji":return!s([55357,56424,55356,57342,8205,55358,56605,8205,55357,56424,55356,57340],[55357,56424,55356,57342,8203,55358,56605,8203,55357,56424,55356,57340])}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(n=t.source||{}).concatemoji?c(n.concatemoji):n.wpemoji&&n.twemoji&&(c(n.twemoji),c(n.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script><script src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/wp-emoji-release.min.js" type="text/javascript" defer="defer"></script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel="stylesheet" id="wp-block-library-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/style.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="contact-form-7-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/styles.css" type="text/css" media="all">
+<link rel="stylesheet" id="stcr-font-awesome-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/font-awesome.min_002.css" type="text/css" media="all">
+<link rel="stylesheet" id="bootstrap-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/bootstrap.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="mauer-google-fonts-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/css.css" type="text/css" media="all">
+<link rel="stylesheet" id="metropolis-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/stylesheet.css" type="text/css" media="all">
+<link rel="stylesheet" id="font-awesome-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/font-awesome.min.css" type="text/css" media="all">
+<link rel="stylesheet" id="mauer-theme-stylesheet-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/style.css" type="text/css" media="all">
+<style id="mauer-theme-stylesheet-inline-css" type="text/css">
+
+			a {color: #0e7501;}
+
+			.mauer-spinner {border-color: #0e7501; border-top-color:transparent;}
+
+			input[type="submit"], .section-main-content input[type="submit"],
+			.ghost-button-link, .section-main-content .ghost-button-link {color: #0e7501;}
+
+			input[type="submit"]:hover, .section-main-content input[type="submit"]:hover,
+			.ghost-button-link:hover, .section-main-content .ghost-button-link:hover {border-color: #0e7501; background-color: #0e7501;}
+
+			.solid-button-link {background-color: #0e7501;}
+
+			.site-desc {color: #0e7501;}
+
+			blockquote {border-left-color: #0e7501;}			.image-logo-wrapper {max-width: 48rem;}
+			
+</style>
+<link rel="stylesheet" id="photo-swipe-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/photoswipe.css" type="text/css" media="all">
+<link rel="stylesheet" id="photo-swipe-default-skin-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/default-skin.css" type="text/css" media="all">
+<link rel="stylesheet" id="enlighter-wpcustom-css" href="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/EnlighterJS.custom.css" type="text/css" media="all">
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/jquery.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/jquery-migrate.min.js"></script>
+<!--[if lt IE 9]>
+<script type='text/javascript' src='https://vivonomicon.com/wp-content/themes/mauer-essentialist/includes/html5Shiv/html5shiv.min.js?ver=5.4.12'></script>
+<![endif]-->
+<!--[if lt IE 9]>
+<script type='text/javascript' src='https://vivonomicon.com/wp-content/themes/mauer-essentialist/includes/respondJS/respond.min.js?ver=5.4.12'></script>
+<![endif]-->
+<link rel="https://api.w.org/" href="https://vivonomicon.com/wp-json/">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://vivonomicon.com/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://vivonomicon.com/wp-includes/wlwmanifest.xml"> 
+<link rel="prev" title="“Bare Metal” STM32 Programming (Part 11): Using External Memories" href="https://vivonomicon.com/2020/07/26/bare-metal-stm32-programming-part-11-using-external-memories/">
+<link rel="next" title="“Bare Metal” STM32 Programming (Part 13): Running Temporary RAM Programs and Using Tightly-Coupled Memories" href="https://vivonomicon.com/2020/09/10/bare-metal-stm32-programming-part-13-running-temporary-ram-programs-and-using-tightly-coupled-memories/">
+<meta name="generator" content="WordPress 5.4.12">
+<link rel="canonical" href="https://vivonomicon.com/2020/08/08/bare-metal-stm32-programming-part-12-using-quad-spi-flash-memory/">
+<link rel="shortlink" href="https://vivonomicon.com/?p=1194">
+<link rel="alternate" type="application/json+oembed" href="https://vivonomicon.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fvivonomicon.com%2F2020%2F08%2F08%2Fbare-metal-stm32-programming-part-12-using-quad-spi-flash-memory%2F">
+<link rel="alternate" type="text/xml+oembed" href="https://vivonomicon.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fvivonomicon.com%2F2020%2F08%2F08%2Fbare-metal-stm32-programming-part-12-using-quad-spi-flash-memory%2F&amp;format=xml">
+<link rel="icon" href="https://vivonomicon.com/wp-content/uploads/2018/04/cropped-just_V_favicon-1-32x32.png" sizes="32x32">
+<link rel="icon" href="https://vivonomicon.com/wp-content/uploads/2018/04/cropped-just_V_favicon-1-192x192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="https://vivonomicon.com/wp-content/uploads/2018/04/cropped-just_V_favicon-1-180x180.png">
+<meta name="msapplication-TileImage" content="https://vivonomicon.com/wp-content/uploads/2018/04/cropped-just_V_favicon-1-270x270.png">
+		<style type="text/css" id="wp-custom-css">
+			p { hyphens: none; }
+.EnlighterJS{
+   width: auto !important;
+   overflow-x: scroll !important;
+   word-wrap: normal !important;
+}
+.EnlighterJS li{
+  white-space: pre !important;
+}		</style>
+		</head>
+
+<body class="post-template-default single single-post postid-1194 single-format-standard" style="margin-bottom: 35px;">
+
+
+<div class="mauer-preloader mauer-preloader-hidden">
+	<div class="mauer-spinner"></div>
+</div>
+
+<div class="search-popup">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+				<form role="search" method="get" id="searchform" action="https://vivonomicon.com/">
+	<div>
+		<p><input type="text" name="s" id="s" placeholder="Type here"></p>
+		<p><input type="submit" id="searchsubmit" value="Search"></p>
+	</div>
+</form>			</div>
+		</div>
+	</div>
+	<a href="#" class="mauer-close search-popup-closer"></a>
+</div>
+
+<div class="section section-menu-stripe">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12">
+
+				<div class="menu-stripe-wrapper">
+
+					<nav class="navbar navbar-default navbar-static-top mauer-navbar">
+						<div class="navbar-header">
+							<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+								<span class="sr-only">Toggle navigation</span>
+								<span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+							</button>
+						</div>
+						<div id="navbar" class="navbar-collapse collapse">
+							<ul id="menu-header-menu" class="nav navbar-nav"><li id="menu-item-168" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-168"><a title="Home" href="http://vivonomicon.com/">Home</a></li>
+<li id="menu-item-192" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-192"><a title="Login" href="https://vivonomicon.com/login">Login</a></li>
+<li id="menu-item-193" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-193"><a title="Logout" href="https://vivonomicon.com/wp-login.php?action=logout">Logout</a></li>
+</ul>							<div class="search-link search-link-in-collapsed-navbar">
+								<a class="search-popup-opener" href=""><i class="fa fa-search"></i></a>
+							</div>
+						</div>
+					</nav>
+
+					<div class="social-links">
+											</div>
+
+					<div class="search-link search-link-in-the-corner">
+						<a class="search-popup-opener" href=""><i class="fa fa-search"></i><span class="search-link-text"></span></a>
+					</div>	
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="section-logo-area">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="site-logo text-center image-logo-wrapper">
+					<a href="https://vivonomicon.com/" class="logo-link">
+						<img src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/book_with_letters_blogsize_S.png" alt="Vivonomicon's Blog">					</a>
+				</div>
+									<div class="site-desc text-center">Blog for my various projects, experiments, and learnings</div>
+							</div>
+		</div>
+	</div>
+</div>
+
+<div class="section-main-content">
+	<div class="container">
+
+					
+			
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="entry-full post-1194 post type-post status-publish format-standard hentry category-stm32_baremetal_examples category-talking_to_hardware">
+
+							<div class="entry-thumb">
+															</div>
+
+
+							<div class="row">
+								<div class="col-md-8 col-md-offset-2">
+
+									<div class="entry-meta text-center add-padding-on-small-resolutions">
+										<span class="entry-date"><a href="https://vivonomicon.com/2020/08/08/bare-metal-stm32-programming-part-12-using-quad-spi-flash-memory/">August 8, 2020</a></span>
+									</div>
+
+									<h1 class="entry-title text-center add-padding-on-small-resolutions">“Bare Metal” STM32 Programming (Part 12): Using Quad-SPI Flash Memory</h1>
+
+									<div class="entry-meta after-entry-title text-center add-padding-on-small-resolutions">
+										<span class="entry-cats"><a href="https://vivonomicon.com/category/stm32_baremetal_examples/" rel="category tag">STM32 Baremetal Examples</a>, <a href="https://vivonomicon.com/category/talking_to_hardware/" rel="category tag">Talking to Hardware</a></span>
+									</div>
+
+									<div class="add-padding-on-small-resolutions">
+																														<div class="entry-content clearfix">
+											<p>If I had to guess what the world’s most popular footprint 
+for low-density memory chips was, I would probably be wrong. But I’ll 
+bet that the humble 8-pin SOIC / DIP / DFN formats would be near the 
+top. You’ve probably used these before; most ESP8266 and ESP32 modules 
+have one under their little metal shield, and motherboards for computers
+ / cars / synthesizers / etc. often use them for storing UEFI / BIOS / 
+firmware configurations and suchlike.</p>
+<div id="attachment_1196" style="width: 779px" class="wp-caption aligncenter"><img aria-describedby="caption-attachment-1196" class="wp-image-1196 size-full" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_flash_pins.png" alt="QSPI Flash Pins" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_flash_pins.png 769w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_flash_pins-300x112.png 300w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_flash_pins-680x255.png 680w" sizes="(max-width: 769px) 100vw, 769px" width="769" height="288"><p id="caption-attachment-1196" class="wp-caption-text">Pin assignments for a generic Flash module (<a href="https://www.winbond.com/resource-files/w25q32jv%20revg%2003272018%20plus.pdf">Winbond W25Q series</a>)</p></div>
+<p>You can get RAM, Flash, EEPROM, and even FRAM memory in these common 
+8-pin packages. They usually use a SPI interface for communication, with
+ a couple of extra pins for functions like write protection or 
+suspending an ongoing transaction. But if you look in the image above, 
+you’ll see that the <code>/WP</code> “Write Protect” and <code>/HOLD or /RESET</code> wires are also marked as <code>IO2</code> and <code>IO3</code>.
+ That’s because many 8-pin Flash chips also support a “Quad-SPI” 
+interface, which is very similar to a bidirectional “3-wire” SPI 
+interface, except that it has four I/O wires instead of one.</p>
+<p>Some STM32 chips include a QSPI peripheral to interface with these 
+kinds of Flash memory chips. You can use it to manually configure / 
+erase / program the Flash chip, and once it’s initialized, you can also 
+map the external Flash as read-only memory in the STM32’s internal 
+memory space. The peripheral supports prefetching, caching, executing 
+code, and it can even access two QSPI Flash chips in parallel, using 8 
+data lines in total to transfer a full byte of data every clock cycle.</p>
+<p>To learn about the QSPI peripheral, I used the same <a href="https://www.st.com/en/evaluation-tools/32f723ediscovery.html">STM32F723E Discovery Kit</a> from <a href="https://vivonomicon.com/2020/07/26/bare-metal-stm32-programming-part-11-using-external-memories/">my last post about external memories</a>.
+ In addition to its external RAM and display, this board includes one 
+64MB QSPI Flash chip connected to the QSPI peripheral. In this post, 
+we’ll learn how to configure the Flash chip for quad I/O access, erase a
+ sector, and write some test values. Then we’ll set the QSPI peripheral 
+to its read-only “memory-mapped” mode, and read those test values by 
+accessing the chip’s internal memory space starting at <code>0x90000000</code>. If you don’t like copy/pasting, you can find <a href="https://github.com/WRansohoff/STM32F723E_QSPI_Example">an example project with this code on GitHub</a>.</p>
+<p>It is a little bit annoying that you can’t write to the Flash chip in
+ memory-mapped mode, but this peripheral still presents a simple way to 
+quickly read from external Flash using only six I/O pins. And writing to
+ Flash memory has some unique limitations anyways, which is why it is 
+often used to store data which an application rarely needs to modify, 
+like firmware or audio/visual resources. So if you want to learn how to 
+use Quad-SPI Flash memories with an STM32, read on!</p>
+<p><span id="more-1194"></span></p>
+<h1>QSPI Overview</h1>
+<p>The QSPI peripheral can be configured for one of four “modes” at any given time. They are:</p>
+<ul>
+<li>Indirect write mode: This mode performs manual QSPI write transactions.</li>
+<li>Indirect read mode: This mode performs manual QSPI read transactions.</li>
+<li>Status flag polling mode: This mode automatically reads a status 
+register from the Flash chip until a specified set of flags are set 
+and/or cleared. It can be used to wait for long operations such as 
+sector erases to complete.</li>
+<li>Memory-mapped mode: This mode mounts the Flash chip as read-only memory in the STM32’s internal memory space.</li>
+</ul>
+<p>To initialize the chip or perform an erase / write sequence, you can 
+use the indirect write mode to send commands, followed by the status 
+flag polling mode to wait for the Flash chip to finish processing those 
+commands. And to read data from the Flash chip after it has been 
+initialized and programmed, you can use the memory-mapped mode. But if 
+your Flash chip is larger than the 256MB of internal memory space 
+dedicated to the QSPI peripheral, you’ll need to use the indirect read 
+mode to read data which is located after the first 256MB.</p>
+<p>Each read and write operation is also split into five “phases”. It 
+will be easier to explain each phase if you look at this waveform 
+diagram from <a href="https://www.st.com/resource/en/reference_manual/dm00305990-stm32f72xxx-and-stm32f73xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf">the reference manual</a> first:</p>
+<div id="attachment_1199" style="width: 702px" class="wp-caption aligncenter"><img aria-describedby="caption-attachment-1199" class="wp-image-1199 size-full" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_phases.png" alt="QSPI Access Phases" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_phases.png 692w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_phases-300x123.png 300w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_phases-680x278.png 680w" sizes="(max-width: 692px) 100vw, 692px" width="692" height="283"><p id="caption-attachment-1199" class="wp-caption-text">QSPI transaction phases, as the peripheral defines them.</p></div>
+<p>Each phase corresponds with part of a typical QSPI memory 
+transaction. First is the “instruction phase”, which sends an 8-bit 
+instruction to the chip. This could be a simple command like <code>0x06</code> (“Enable Writes”), in which case only the “instruction” phase is used. Or it could be a memory access command like <code>0xEC</code>
+ (“Quad I/O Read with 4-byte addressing”), in which case the 
+“instruction”, “address”, “dummy”, and “data” phases are all required. 
+“Dummy cycles” are used to give the chip time to prepare its response 
+with high-speed Quad-I/O accesses, and I don’t think that the “alternate
+ bytes” phase is used by the Flash chip included on this board.</p>
+<p>You can find a table of commands and descriptions of what they do in 
+your memory chip’s datasheet; the STM32F723E Discovery Kit uses a <a href="https://www.macronix.com/Lists/Datasheet/Attachments/7437/MX25L51245G,%203V,%20512Mb,%20v1.6.pdf">Micron MX25L51245G</a>
+ Flash chip. Most 8-pin Flash chips use 24-bit addressing by default, 
+but since this one contains more than 16MB of memory, it also supports 
+32-bit addressing.</p>
+<p>Different commands have different address and data byte requirements,
+ so you can enable or disable each phase individually. You can also set 
+each phase to use a different number of data lines; in the figure above,
+ the “instruction phase” only uses one data line, while the other phases
+ use four. But <code>MX25L512</code> chips support 4-wire instructions, so after we issue the <code>0x35</code> “Enable Quad I/O” command, we can use 4 data lines for every phase.</p>
+<h1>Boilerplate: Configure Clocks, GPIO Pins, etc.</h1>
+<p>We can use the same clock configuration code from my last post to set
+ a core clock speed of 216MHz. The peripheral would work fine at the 
+default speed of 16MHz, but then I wouldn’t have an excuse to talk about
+ configuring the QSPI peripheral for a max speed of 84MHz:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Set clock speed to 216MHz (each tick is a bit less than 5ns)
+  // PLL out = ( 16MHz * ( N / M ) / P ). P = 2, N = 54, M = 2.
+  FLASH-&gt;ACR   |=  ( 7 &lt;&lt; FLASH_ACR_LATENCY_Pos );
+  RCC-&gt;PLLCFGR &amp;= ~( RCC_PLLCFGR_PLLN |
+                     RCC_PLLCFGR_PLLM );
+  RCC-&gt;PLLCFGR |=  ( ( 54 &lt;&lt; RCC_PLLCFGR_PLLN_Pos ) |
+                     ( 2 &lt;&lt; RCC_PLLCFGR_PLLM_Pos ) );
+  RCC-&gt;CR      |=  ( RCC_CR_PLLON );
+  while ( !( RCC-&gt;CR &amp; RCC_CR_PLLRDY ) ) {};
+  RCC-&gt;CFGR    |=  ( 2 &lt;&lt; RCC_CFGR_SW_Pos );
+  while ( ( RCC-&gt;CFGR &amp; RCC_CFGR_SWS ) != ( 2 &lt;&lt; RCC_CFGR_SWS_Pos ) ) {};
+  SystemCoreClock = 216000000;</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Set clock speed to 216MHz (each tick is a bit less than 5ns)</span><span class=""></span></li><li class=" even"><span class=""> </span><span class="co1"> // PLL out = ( 16MHz * ( N / M ) / P ). P = 2, N = 54, M = 2.</span><span class=""></span></li><li class=" odd"><span class="">  FLASH-&gt;ACR   |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">7</span><span class=""> &lt;&lt; FLASH_ACR_LATENCY_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  RCC-&gt;PLLCFGR &amp;= ~</span><span class="br0">(</span><span class=""> RCC_PLLCFGR_PLLN |</span></li><li class=" odd"><span class="">                     RCC_PLLCFGR_PLLM </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  RCC-&gt;PLLCFGR |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">54</span><span class=""> &lt;&lt; RCC_PLLCFGR_PLLN_Pos </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                     </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; RCC_PLLCFGR_PLLM_Pos </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  RCC-&gt;CR      |=  </span><span class="br0">(</span><span class=""> RCC_CR_PLLON </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> !</span><span class="br0">(</span><span class=""> RCC-&gt;CR &amp; RCC_CR_PLLRDY </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" even"><span class="">  RCC-&gt;CFGR    |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; RCC_CFGR_SW_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> RCC-&gt;CFGR &amp; RCC_CFGR_SWS </span><span class="br0">)</span><span class=""> != </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; RCC_CFGR_SWS_Pos </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" even"><span class="">  SystemCoreClock = </span><span class="nu0">216000000</span><span class="">;</span></li></ul><pre style="display: none;">  // Set clock speed to 216MHz (each tick is a bit less than 5ns)
+  // PLL out = ( 16MHz * ( N / M ) / P ). P = 2, N = 54, M = 2.
+  FLASH-&gt;ACR   |=  ( 7 &lt;&lt; FLASH_ACR_LATENCY_Pos );
+  RCC-&gt;PLLCFGR &amp;= ~( RCC_PLLCFGR_PLLN |
+                     RCC_PLLCFGR_PLLM );
+  RCC-&gt;PLLCFGR |=  ( ( 54 &lt;&lt; RCC_PLLCFGR_PLLN_Pos ) |
+                     ( 2 &lt;&lt; RCC_PLLCFGR_PLLM_Pos ) );
+  RCC-&gt;CR      |=  ( RCC_CR_PLLON );
+  while ( !( RCC-&gt;CR &amp; RCC_CR_PLLRDY ) ) {};
+  RCC-&gt;CFGR    |=  ( 2 &lt;&lt; RCC_CFGR_SW_Pos );
+  while ( ( RCC-&gt;CFGR &amp; RCC_CFGR_SWS ) != ( 2 &lt;&lt; RCC_CFGR_SWS_Pos ) ) {};
+  SystemCoreClock = 216000000;</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>The Discovery Kit’s user manual shows that pins <code>B2</code>, <code>B6</code>, <code>C9</code>, <code>C10</code>, <code>D13</code>, and <code>E2</code> are connected to the QSPI peripheral, so we’ll need to enable the <code>GPIOB</code>, <code>GPIOC</code>, <code>GPIOD</code>, and <code>GPIOE</code> peripherals in addition to <code>QUADSPI</code>. <code>USART6</code> is also used for printing messages over the board’s serial connection:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Enable peripheral clocks: GPIOB-E, QSPI, USART6.
+  RCC-&gt;AHB1ENR |=  ( RCC_AHB1ENR_GPIOBEN |
+                     RCC_AHB1ENR_GPIOCEN |
+                     RCC_AHB1ENR_GPIODEN |
+                     RCC_AHB1ENR_GPIOEEN );
+  RCC-&gt;AHB3ENR |=  ( RCC_AHB3ENR_QSPIEN );
+  RCC-&gt;APB2ENR |=  ( RCC_APB2ENR_USART6EN );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Enable peripheral clocks: GPIOB-E, QSPI, USART6.</span><span class=""></span></li><li class=" even"><span class="">  RCC-&gt;AHB1ENR |=  </span><span class="br0">(</span><span class=""> RCC_AHB1ENR_GPIOBEN |</span></li><li class=" odd"><span class="">                     RCC_AHB1ENR_GPIOCEN |</span></li><li class=" even"><span class="">                     RCC_AHB1ENR_GPIODEN |</span></li><li class=" odd"><span class="">                     RCC_AHB1ENR_GPIOEEN </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  RCC-&gt;AHB3ENR |=  </span><span class="br0">(</span><span class=""> RCC_AHB3ENR_QSPIEN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  RCC-&gt;APB2ENR |=  </span><span class="br0">(</span><span class=""> RCC_APB2ENR_USART6EN </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Enable peripheral clocks: GPIOB-E, QSPI, USART6.
+  RCC-&gt;AHB1ENR |=  ( RCC_AHB1ENR_GPIOBEN |
+                     RCC_AHB1ENR_GPIOCEN |
+                     RCC_AHB1ENR_GPIODEN |
+                     RCC_AHB1ENR_GPIOEEN );
+  RCC-&gt;AHB3ENR |=  ( RCC_AHB3ENR_QSPIEN );
+  RCC-&gt;APB2ENR |=  ( RCC_APB2ENR_USART6EN );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>The <a href="https://www.st.com/resource/en/datasheet/stm32f723ie.pdf">STM32F723IE datasheet</a> shows that pin <code>B6</code> uses alternate function #10 for QSPI, while the other pins use alternate function #9. Pin <code>B6</code>
+ should also be configured with a pull-up resistor, since it is 
+connected to the “chip select” pin which activates the Flash memory when
+ it is held low. There is also a pull-up resistor soldered to the board,
+ but you might be able to omit that part from your designs if you 
+configure the chip’s internal pull-up in your code:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Initialize pins C6 and C7 for USART6.
+  GPIOC-&gt;MODER    |=  ( ( 2 &lt;&lt; ( 6 * 2 ) ) |
+                        ( 2 &lt;&lt; ( 7 * 2 ) ) );
+  GPIOC-&gt;OSPEEDR  |=  ( ( 2 &lt;&lt; ( 6 * 2 ) ) |
+                        ( 2 &lt;&lt; ( 7 * 2 ) ) );
+  GPIOC-&gt;AFR[ 0 ] |=  ( ( 8 &lt;&lt; ( 6 * 4 ) ) |
+                        ( 8 &lt;&lt; ( 7 * 4 ) ) );
+  // Initialize pins B2, B6, C9, C10, D13, E2 for QSPI.
+  GPIOB-&gt;MODER    |=  ( ( 2 &lt;&lt; ( 2 * 2 ) ) |
+                        ( 2 &lt;&lt; ( 6 * 2 ) ) );
+  GPIOB-&gt;OSPEEDR  |=  ( ( 3 &lt;&lt; ( 2 * 2 ) ) |
+                        ( 3 &lt;&lt; ( 6 * 2 ) ) );
+  GPIOB-&gt;PUPDR    |=  ( 1 &lt;&lt; ( 6 * 2 ) );
+  GPIOB-&gt;AFR[ 0 ] |=  ( ( 9 &lt;&lt; ( 2 * 4 ) ) |
+                        ( 10 &lt;&lt; ( 6 * 4 ) ) );
+  GPIOC-&gt;MODER    |=  ( ( 2 &lt;&lt; ( 9 * 2 ) ) |
+                        ( 2 &lt;&lt; ( 10 * 2 ) ) );
+  GPIOC-&gt;OSPEEDR  |=  ( ( 3 &lt;&lt; ( 9 * 2 ) ) |
+                        ( 3 &lt;&lt; ( 10 * 2 ) ) );
+  GPIOC-&gt;AFR[ 1 ] |=  ( ( 9 &lt;&lt; ( ( 9 - 8 ) * 4 ) ) |
+                        ( 9 &lt;&lt; ( ( 10 - 8 ) * 4 ) ) );
+  GPIOD-&gt;MODER    |=  ( 2 &lt;&lt; ( 13 * 2 ) );
+  GPIOD-&gt;OSPEEDR  |=  ( 3 &lt;&lt; ( 13 * 2 ) );
+  GPIOD-&gt;AFR[ 1 ] |=  ( 9 &lt;&lt; ( ( 13 - 8 ) * 4 ) );
+  GPIOE-&gt;MODER    |=  ( 2 &lt;&lt; ( 2 * 2 ) );
+  GPIOE-&gt;OSPEEDR  |=  ( 3 &lt;&lt; ( 2 * 2 ) );
+  GPIOE-&gt;AFR[ 0 ] |=  ( 9 &lt;&lt; ( 2 * 4 ) );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Initialize pins C6 and C7 for USART6.</span><span class=""></span></li><li class=" even"><span class="">  GPIOC-&gt;MODER    |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">6</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">7</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOC-&gt;OSPEEDR  |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">6</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">7</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOC-&gt;AFR</span><span class="br0">[</span><span class=""> </span><span class="nu0">0</span><span class=""> </span><span class="br0">]</span><span class=""> |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">8</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">6</span><span class=""> * </span><span class="nu0">4</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">8</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">7</span><span class=""> * </span><span class="nu0">4</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Initialize pins B2, B6, C9, C10, D13, E2 for QSPI.</span><span class=""></span></li><li class=" odd"><span class="">  GPIOB-&gt;MODER    |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" even"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">6</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  GPIOB-&gt;OSPEEDR  |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" even"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">6</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  GPIOB-&gt;PUPDR    |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">1</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">6</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOB-&gt;AFR</span><span class="br0">[</span><span class=""> </span><span class="nu0">0</span><span class=""> </span><span class="br0">]</span><span class=""> |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">9</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> * </span><span class="nu0">4</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">10</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">6</span><span class=""> * </span><span class="nu0">4</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOC-&gt;MODER    |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">9</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">10</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOC-&gt;OSPEEDR  |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">9</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">10</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOC-&gt;AFR</span><span class="br0">[</span><span class=""> </span><span class="nu0">1</span><span class=""> </span><span class="br0">]</span><span class=""> |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">9</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">9</span><span class=""> - </span><span class="nu0">8</span><span class=""> </span><span class="br0">)</span><span class=""> * </span><span class="nu0">4</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                        </span><span class="br0">(</span><span class=""> </span><span class="nu0">9</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">10</span><span class=""> - </span><span class="nu0">8</span><span class=""> </span><span class="br0">)</span><span class=""> * </span><span class="nu0">4</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOD-&gt;MODER    |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">13</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  GPIOD-&gt;OSPEEDR  |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">13</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOD-&gt;AFR</span><span class="br0">[</span><span class=""> </span><span class="nu0">1</span><span class=""> </span><span class="br0">]</span><span class=""> |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">9</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">13</span><span class=""> - </span><span class="nu0">8</span><span class=""> </span><span class="br0">)</span><span class=""> * </span><span class="nu0">4</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  GPIOE-&gt;MODER    |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  GPIOE-&gt;OSPEEDR  |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> * </span><span class="nu0">2</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  GPIOE-&gt;AFR</span><span class="br0">[</span><span class=""> </span><span class="nu0">0</span><span class=""> </span><span class="br0">]</span><span class=""> |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">9</span><span class=""> &lt;&lt; </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> * </span><span class="nu0">4</span><span class=""> </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Initialize pins C6 and C7 for USART6.
+  GPIOC-&gt;MODER    |=  ( ( 2 &lt;&lt; ( 6 * 2 ) ) |
+                        ( 2 &lt;&lt; ( 7 * 2 ) ) );
+  GPIOC-&gt;OSPEEDR  |=  ( ( 2 &lt;&lt; ( 6 * 2 ) ) |
+                        ( 2 &lt;&lt; ( 7 * 2 ) ) );
+  GPIOC-&gt;AFR[ 0 ] |=  ( ( 8 &lt;&lt; ( 6 * 4 ) ) |
+                        ( 8 &lt;&lt; ( 7 * 4 ) ) );
+  // Initialize pins B2, B6, C9, C10, D13, E2 for QSPI.
+  GPIOB-&gt;MODER    |=  ( ( 2 &lt;&lt; ( 2 * 2 ) ) |
+                        ( 2 &lt;&lt; ( 6 * 2 ) ) );
+  GPIOB-&gt;OSPEEDR  |=  ( ( 3 &lt;&lt; ( 2 * 2 ) ) |
+                        ( 3 &lt;&lt; ( 6 * 2 ) ) );
+  GPIOB-&gt;PUPDR    |=  ( 1 &lt;&lt; ( 6 * 2 ) );
+  GPIOB-&gt;AFR[ 0 ] |=  ( ( 9 &lt;&lt; ( 2 * 4 ) ) |
+                        ( 10 &lt;&lt; ( 6 * 4 ) ) );
+  GPIOC-&gt;MODER    |=  ( ( 2 &lt;&lt; ( 9 * 2 ) ) |
+                        ( 2 &lt;&lt; ( 10 * 2 ) ) );
+  GPIOC-&gt;OSPEEDR  |=  ( ( 3 &lt;&lt; ( 9 * 2 ) ) |
+                        ( 3 &lt;&lt; ( 10 * 2 ) ) );
+  GPIOC-&gt;AFR[ 1 ] |=  ( ( 9 &lt;&lt; ( ( 9 - 8 ) * 4 ) ) |
+                        ( 9 &lt;&lt; ( ( 10 - 8 ) * 4 ) ) );
+  GPIOD-&gt;MODER    |=  ( 2 &lt;&lt; ( 13 * 2 ) );
+  GPIOD-&gt;OSPEEDR  |=  ( 3 &lt;&lt; ( 13 * 2 ) );
+  GPIOD-&gt;AFR[ 1 ] |=  ( 9 &lt;&lt; ( ( 13 - 8 ) * 4 ) );
+  GPIOE-&gt;MODER    |=  ( 2 &lt;&lt; ( 2 * 2 ) );
+  GPIOE-&gt;OSPEEDR  |=  ( 3 &lt;&lt; ( 2 * 2 ) );
+  GPIOE-&gt;AFR[ 0 ] |=  ( 9 &lt;&lt; ( 2 * 4 ) );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>Pins <code>C6</code> and <code>C7</code> are also connected to <code>USART6</code>, and I also added the usual <code>_write</code> method to enable the <code>printf</code> standard library function; you can find that in <a href="https://github.com/WRansohoff/STM32F723E_QSPI_Example">the example project on GitHub</a> or <a href="https://vivonomicon.com/2020/06/28/bare-metal-stm32-programming-part-10-uart-communication/">in my post about UART communication</a>.</p>
+<h1>QSPI Configuration</h1>
+<p>The QSPI peripheral only needs a few pieces of information to start 
+communicating with a Flash chip. First, we need to tell it how large the
+ connected memory is. The <code>DCR</code> register contains an <code>FSIZE</code> (“Flash Size”) field which holds that information. It expects an exponent value:</p>
+<pre>#Bytes = 2 ^ (FSIZE + 1)</pre>
+<p>In our case, <code>64MB = 2 ^ 26 Bytes</code>, so <code>FSIZE = 25</code>. Next, we should configure the transaction phases: setting the <code>IMODE</code> field to <code>1</code> in <code>CCR</code> enables the “instruction phase” with one data wire. I also configured the <code>ADSIZE</code> field for 32-bit addressing, because I’ll issue the <code>0xB7</code> “enable 4-byte addressing” command before performing any memory accesses:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // QSPI peripheral initialization.
+  // Set Flash size; 512Mb = 64MB = 2^(25+1) bytes.
+  QUADSPI-&gt;DCR |=  ( 25 &lt;&lt; QUADSPI_DCR_FSIZE_Pos );
+  // Set 1-wire data mode with 32-bit addressing.
+  QUADSPI-&gt;CCR |=  ( ( 3 &lt;&lt; QUADSPI_CCR_ADSIZE_Pos ) |
+                     ( 1 &lt;&lt; QUADSPI_CCR_IMODE_Pos ) );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // QSPI peripheral initialization.</span><span class=""></span></li><li class=" even"><span class=""> </span><span class="co1"> // Set Flash size; 512Mb = 64MB = 2^(25+1) bytes.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;DCR |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">25</span><span class=""> &lt;&lt; QUADSPI_DCR_FSIZE_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Set 1-wire data mode with 32-bit addressing.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_ADSIZE_Pos </span><span class="br0">)</span><span class=""> |</span></li><li class=" even"><span class="">                     </span><span class="br0">(</span><span class=""> </span><span class="nu0">1</span><span class=""> &lt;&lt; QUADSPI_CCR_IMODE_Pos </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // QSPI peripheral initialization.
+  // Set Flash size; 512Mb = 64MB = 2^(25+1) bytes.
+  QUADSPI-&gt;DCR |=  ( 25 &lt;&lt; QUADSPI_DCR_FSIZE_Pos );
+  // Set 1-wire data mode with 32-bit addressing.
+  QUADSPI-&gt;CCR |=  ( ( 3 &lt;&lt; QUADSPI_CCR_ADSIZE_Pos ) |
+                     ( 1 &lt;&lt; QUADSPI_CCR_IMODE_Pos ) );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>We’ll also need to set a clock prescaler; the <a href="https://www.macronix.com/Lists/Datasheet/Attachments/7437/MX25L51245G,%203V,%20512Mb,%20v1.6.pdf">Flash chip’s datasheet</a>
+ contains a “Dummy Cycle and Frequency Table” which defines how quickly 
+the interface can run with different numbers of dummy cycles. The 
+default number of dummy cycles is 6 for the “Quad I/O Fast Read” 
+command, which corresponds with a 84MHz top speed. Setting the <code>PRESCALER</code> field to <code>2</code> will give us a frequency of <code>216MHz / (2+1) = 72MHz</code>, which is close enough for this example:</p>
+<div id="attachment_1213" style="width: 485px" class="wp-caption aligncenter"><img aria-describedby="caption-attachment-1213" class="wp-image-1213 size-full" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_dc_2.png" alt="QSPI Dummy Cycles" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_dc_2.png 475w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_dc_2-300x85.png 300w" sizes="(max-width: 475px) 100vw, 475px" width="475" height="135"><p id="caption-attachment-1213" class="wp-caption-text">QSPI dummy cycles table from the Flash chip’s datasheet.</p></div>
+<p>It’s also a good idea to set the <code>SSHIFT</code> bit in the 
+peripheral’s control register. That tells the peripheral to wait an 
+extra half clock cycle before reading values from the Flash chip, which 
+seems to help account for signal delays and noise.</p>
+<p>Once the peripheral is configured, you can set the <code>EN</code> bit to enable it:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Wait an extra half-cycle to read, and set a clock prescaler of 2+1=3.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_SSHIFT |
+                     ( 2 &lt;&lt; QUADSPI_CR_PRESCALER_Pos ) );
+  // Enable the peripheral.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Wait an extra half-cycle to read, and set a clock prescaler of 2+1=3.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CR  |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_SSHIFT |</span></li><li class=" odd"><span class="">                     </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; QUADSPI_CR_PRESCALER_Pos </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Enable the peripheral.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CR  |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Wait an extra half-cycle to read, and set a clock prescaler of 2+1=3.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_SSHIFT |
+                     ( 2 &lt;&lt; QUADSPI_CR_PRESCALER_Pos ) );
+  // Enable the peripheral.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<h2>Initialization</h2>
+<p>Once the peripheral is set up, you can start sending commands to initialize the Flash chip. Since we only set the <code>IMODE</code> field in the <code>CCR</code> register, only the instruction phase is enabled. The first order of business is to send the <code>0x35</code> “Enable Quad I/O” command to the chip, which will let us use all four data wires instead of one:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Set the 'enter QSPI mode' instruction.
+  QUADSPI-&gt;CCR |=  ( 0x35 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // Wait for the transaction to complete, and disable the peripheral.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Set the 'enter QSPI mode' instruction.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">0x35</span><span class=""> &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Wait for the transaction to complete, and disable the peripheral.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;CR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Set the 'enter QSPI mode' instruction.
+  QUADSPI-&gt;CCR |=  ( 0x35 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // Wait for the transaction to complete, and disable the peripheral.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>As you might guess, the <code>INSTRUCTION</code> field in the <code>CCR</code>
+ “Communication Configuration Register” contains the 8-bit instruction 
+to send to the chip. And when you are using the indirect and 
+status-polling modes, it’s a good idea to disable the QSPI peripheral 
+when you aren’t using it. When it is active, the peripheral will 
+automatically start a new transaction when certain fields or registers 
+are written, depending on which phases are enabled.</p>
+<p>With only the “instruction phase” enabled, <a href="https://www.st.com/resource/en/reference_manual/dm00305990-stm32f72xxx-and-stm32f73xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf">the reference manual</a> says that a new transaction will start whenever the <code>INSTRUCTION</code>
+ field is modified. I don’t know whether clearing the field counts as 
+modifying it, but I figure it’s better to be safe than sorry. And when 
+multiple phases are enabled, writing to the “last” active configuration 
+field (instruction -&gt; address -&gt; data) starts the transaction. 
+That can get confusing, so to avoid accidentally starting a transaction,
+ I decided to only enable the peripheral right before a new transaction 
+should start.</p>
+<p>Next, we need to wait for the Flash chip to acknowledge our request. 
+We can do that by checking its status registers; some commands will 
+cause the chip to respond with some basic information about its current 
+state. In this case, we want to check the main status register, which is
+ returned by the <code>0x05</code> “read status register” command. If 
+bit #6 is set in the response, then the chip is in QSPI mode. It’s also a
+ good idea to check bit #1, which is the “write in progress” bit; if 
+that bit is set, the chip is busy writing and you should wait for it to 
+finish:</p>
+<div id="attachment_1210" style="width: 697px" class="wp-caption aligncenter"><img aria-describedby="caption-attachment-1210" class="wp-image-1210 size-full" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_sr.png" alt="QSPI Status Register Bits" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_sr.png 687w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_sr-300x114.png 300w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_sr-680x258.png 680w" sizes="(max-width: 687px) 100vw, 687px" width="687" height="261"><p id="caption-attachment-1210" class="wp-caption-text">QSPI status register bits. We’ll mostly be interested in the “Quad Enable”, “Write Enable Latch”, and “Write in Progress” bits.</p></div>
+<p>This sort of situation is what the peripheral’s “status flag polling 
+mode” is for. It accepts a “mask” value which tells it which bits to pay
+ attention to, and a “match” value which tells it what those bits should
+ be set to. We want to wait for the status register to have bit #6 set 
+and bit #1 cleared, so we can set a “mask” value of <code>0x41</code> and a “match” value of <code>0x40</code>. Since “wait for value X in register Y” is a common task, I decided to write a helper method:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">// Use 'status-polling' mode to wait for Flash register status.
+void qspi_reg_wait( uint8_t reg, uint32_t msk, uint32_t mat ) {
+  // Disable the peripheral.
+  QUADSPI-&gt;CR   &amp;= ~( QUADSPI_CR_EN );
+  // Set the 'mask', 'match', and 'polling interval' values.
+  QUADSPI-&gt;PSMKR = msk;
+  QUADSPI-&gt;PSMAR = mat;
+  QUADSPI-&gt;PIR   = 0x10;
+  // Set the 'auto-stop' bit to end the transaction after a match.
+  QUADSPI-&gt;CR   |=  ( QUADSPI_CR_APMS );
+  // Clear instruction, mode and transaction phases.
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_INSTRUCTION |
+                      QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_IMODE |
+                      QUADSPI_CCR_DMODE |
+                      QUADSPI_CCR_ADMODE );
+  // Set 4-wire instruction and data modes, and auto-polling mode.
+  QUADSPI-&gt;CCR  |=  ( ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos ) |
+                      ( 3 &lt;&lt; QUADSPI_CCR_DMODE_Pos ) |
+                      ( 2 &lt;&lt; QUADSPI_CCR_FMODE_Pos ) );
+  // Enable the peripheral.
+  QUADSPI-&gt;CR   |=  ( QUADSPI_CR_EN );
+  // Set the given 'read register' instruction to start polling.
+  QUADSPI-&gt;CCR  |=  ( reg &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // Wait for a match.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  // Acknowledge the 'status match flag.'
+  QUADSPI-&gt;FCR |=  ( QUADSPI_FCR_CSMF );
+  // Un-set the data mode and disable auto-polling.
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_DMODE );
+  // Disable the peripheral.
+  QUADSPI-&gt;CR   &amp;= ~( QUADSPI_CR_EN );
+}</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class="co1">// Use 'status-polling' mode to wait for Flash register status.</span><span class=""></span></li><li class=" even"><span class=""></span><span class="kw1">void</span><span class=""> </span><span class="de1">qspi_reg_wait</span><span class="br0">(</span><span class=""> uint8_t reg, uint32_t msk, uint32_t mat </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class=""></span></li><li class=" odd"><span class=""> </span><span class="co1"> // Disable the peripheral.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CR   &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Set the 'mask', 'match', and 'polling interval' values.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;PSMKR = msk;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;PSMAR = mat;</span></li><li class=" even"><span class="">  QUADSPI-&gt;PIR   = </span><span class="nu0">0x10</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Set the 'auto-stop' bit to end the transaction after a match.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CR   |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_APMS </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Clear instruction, mode and transaction phases.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CCR_INSTRUCTION |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_FMODE |</span></li><li class=" even"><span class="">                      QUADSPI_CCR_IMODE |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_DMODE |</span></li><li class=" even"><span class="">                      QUADSPI_CCR_ADMODE </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Set 4-wire instruction and data modes, and auto-polling mode.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR  |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_IMODE_Pos </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                      </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_DMODE_Pos </span><span class="br0">)</span><span class=""> |</span></li><li class=" even"><span class="">                      </span><span class="br0">(</span><span class=""> </span><span class="nu0">2</span><span class=""> &lt;&lt; QUADSPI_CCR_FMODE_Pos </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Enable the peripheral.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CR   |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Set the given 'read register' instruction to start polling.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR  |=  </span><span class="br0">(</span><span class=""> reg &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Wait for a match.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Acknowledge the 'status match flag.'</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;FCR |=  </span><span class="br0">(</span><span class=""> QUADSPI_FCR_CSMF </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Un-set the data mode and disable auto-polling.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CCR_FMODE |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_DMODE </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Disable the peripheral.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CR   &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""></span><span class="br0">}</span></li></ul><pre style="display: none;">// Use 'status-polling' mode to wait for Flash register status.
+void qspi_reg_wait( uint8_t reg, uint32_t msk, uint32_t mat ) {
+  // Disable the peripheral.
+  QUADSPI-&gt;CR   &amp;= ~( QUADSPI_CR_EN );
+  // Set the 'mask', 'match', and 'polling interval' values.
+  QUADSPI-&gt;PSMKR = msk;
+  QUADSPI-&gt;PSMAR = mat;
+  QUADSPI-&gt;PIR   = 0x10;
+  // Set the 'auto-stop' bit to end the transaction after a match.
+  QUADSPI-&gt;CR   |=  ( QUADSPI_CR_APMS );
+  // Clear instruction, mode and transaction phases.
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_INSTRUCTION |
+                      QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_IMODE |
+                      QUADSPI_CCR_DMODE |
+                      QUADSPI_CCR_ADMODE );
+  // Set 4-wire instruction and data modes, and auto-polling mode.
+  QUADSPI-&gt;CCR  |=  ( ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos ) |
+                      ( 3 &lt;&lt; QUADSPI_CCR_DMODE_Pos ) |
+                      ( 2 &lt;&lt; QUADSPI_CCR_FMODE_Pos ) );
+  // Enable the peripheral.
+  QUADSPI-&gt;CR   |=  ( QUADSPI_CR_EN );
+  // Set the given 'read register' instruction to start polling.
+  QUADSPI-&gt;CCR  |=  ( reg &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // Wait for a match.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  // Acknowledge the 'status match flag.'
+  QUADSPI-&gt;FCR |=  ( QUADSPI_FCR_CSMF );
+  // Un-set the data mode and disable auto-polling.
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_DMODE );
+  // Disable the peripheral.
+  QUADSPI-&gt;CR   &amp;= ~( QUADSPI_CR_EN );
+}</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>Like I said earlier, it’s good to have the peripheral rest in an 
+“off” state when you are using “indirect” or “status flag polling” 
+modes, so I have logic to disable it at the start and end of the method.
+ The “mask” and “match” values are set near the top, along with a 
+“polling interval” value which tells the peripheral how often it should 
+read its register from the Flash chip.</p>
+<p>The <code>APMS</code> bit causes the peripheral to set the <code>BUSY</code>
+ flag and stop requesting new values when it gets a match, which is the 
+behavior that we want. And since the response is sent during the data 
+phase, we need to set both instruction and data phases to use all four 
+data lines. We also need to set the <code>FMODE</code> field to <code>2</code>, which enables the status flag polling mode.</p>
+<p>Once all of that is done, we can enable the peripheral and wait for the <code>BUSY</code> flag to be set. Once it is, we need to set the <code>CSMF</code> “clear status match” flag in the <code>FCR</code>
+ “Flag Clear Register” to acknowledge the match. With that method in 
+place, we can add logic to wait for the Flash chip to enable its QSPI 
+functionality after sending the <code>0x35</code> instruction:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Wait for the 'QSPI mode enabled' bit.
+  qspi_reg_wait( 0x05, 0x41, 0x40 );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Wait for the 'QSPI mode enabled' bit.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="de1">qspi_reg_wait</span><span class="br0">(</span><span class=""> </span><span class="nu0">0x05</span><span class="">, </span><span class="nu0">0x41</span><span class="">, </span><span class="nu0">0x40</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Wait for the 'QSPI mode enabled' bit.
+  qspi_reg_wait( 0x05, 0x41, 0x40 );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>Then we can enable 4-byte addressing mode to use 32-bit addresses 
+instead of 24-bit ones using the same sort of logic. We just send the <code>0xB7</code> command instead of <code>0x35</code>, and we wait for bit #5 in the “configuration register” returned by the <code>0x15</code> command:</p>
+<div id="attachment_1211" style="width: 703px" class="wp-caption aligncenter"><img aria-describedby="caption-attachment-1211" class="wp-image-1211 size-full" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_cfg.png" alt="QSPI Configuration Register" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_cfg.png 693w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_cfg-300x105.png 300w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/qspi_cfg-680x238.png 680w" sizes="(max-width: 693px) 100vw, 693px" width="693" height="243"><p id="caption-attachment-1211" class="wp-caption-text">QSPI configuration register; we only care about the “4BYTE” bit in this example.</p></div>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Send 'enable 4-byte addressing' command.
+  // The peripheral may start a new transfer as soon as the
+  // 'instruction' field is written, so it is safest to disable
+  // the peripheral before clearing that field.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR &amp;= ~( QUADSPI_CCR_INSTRUCTION );
+  // Use all 4 data lines to send the instruction.
+  QUADSPI-&gt;CCR |=  ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos );
+  // Enable the peripheral and send the 'enable 4B addresses' command.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR |=  ( 0xB7 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // Wait for the transaction to complete, and disable the peripheral.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  // Wait for the '4-byte addressing enabled' bit to be set.
+  qspi_reg_wait( 0x15, 0x20, 0x20 );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Send 'enable 4-byte addressing' command.</span><span class=""></span></li><li class=" even"><span class=""> </span><span class="co1"> // The peripheral may start a new transfer as soon as the</span><span class=""></span></li><li class=" odd"><span class=""> </span><span class="co1"> // 'instruction' field is written, so it is safest to disable</span><span class=""></span></li><li class=" even"><span class=""> </span><span class="co1"> // the peripheral before clearing that field.</span><span class=""></span></li><li class=" odd"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CCR_INSTRUCTION </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Use all 4 data lines to send the instruction.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_IMODE_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Enable the peripheral and send the 'enable 4B addresses' command.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CR  |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">0xB7</span><span class=""> &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Wait for the transaction to complete, and disable the peripheral.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;CR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Wait for the '4-byte addressing enabled' bit to be set.</span><span class=""></span></li><li class=" odd"><span class="">  </span><span class="de1">qspi_reg_wait</span><span class="br0">(</span><span class=""> </span><span class="nu0">0x15</span><span class="">, </span><span class="nu0">0x20</span><span class="">, </span><span class="nu0">0x20</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Send 'enable 4-byte addressing' command.
+  // The peripheral may start a new transfer as soon as the
+  // 'instruction' field is written, so it is safest to disable
+  // the peripheral before clearing that field.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR &amp;= ~( QUADSPI_CCR_INSTRUCTION );
+  // Use all 4 data lines to send the instruction.
+  QUADSPI-&gt;CCR |=  ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos );
+  // Enable the peripheral and send the 'enable 4B addresses' command.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR |=  ( 0xB7 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // Wait for the transaction to complete, and disable the peripheral.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  // Wait for the '4-byte addressing enabled' bit to be set.
+  qspi_reg_wait( 0x15, 0x20, 0x20 );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>With those two configuration commands sent, we are finally ready to write data to the chip.</p>
+<h2>Erasing a Sector</h2>
+<p>Flash chips are harder to write to than RAM chips, because they 
+cannot perform random single-byte writes. The chip can clear individual 
+bits of data, but the only way it can set bits is through a bulk erase 
+operation. When you erase a sector of memory, all of the bits in that 
+sector are set to <code>1</code>. After that is done, you can “write” data by clearing any bits which need to be <code>0</code>. But once you’ve cleared a bit, it can only be set again by erasing its entire sector.</p>
+<p>Flash memory can also only survive a limited number of erase cycles 
+before it stops working. The approximate number of erase cycles that 
+each sector can handle is called <a href="https://en.wikipedia.org/wiki/Flash_memory#Write_endurance">“write endurance”</a>.</p>
+<p>Those complications mean that the QSPI peripheral’s “memory-mapped” mode cannot perform writes. If you wanted to write <code>0x12</code> followed by <code>0x34</code>
+ to the same address, you would need to erase and restore an entire 
+sector of memory, changing only the one byte which you were interested 
+in. That would take a long time, and if it happened frequently in the 
+background, you might unknowingly burn out the Flash chip by using up 
+its limited number of erase cycles.</p>
+<p>So when you want to write data, you’ll need to use the peripheral’s 
+“indirect” and “status flag polling” modes. To erase a sector, we first 
+need to send the <code>0x06</code> “enable writes” command and wait for the corresponding configuration register flag to be set:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">// Enable writes on the QSPI Flash. Must be done before every
+// erase / program operation.
+void qspi_wen() {
+  // Disable the peripheral.
+  QUADSPI-&gt;CR   &amp;= ~( QUADSPI_CR_EN );
+  // Clear the instruction, mode, and transaction phases.
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_INSTRUCTION |
+                      QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_IMODE |
+                      QUADSPI_CCR_DMODE |
+                      QUADSPI_CCR_ADMODE );
+  // Set 4-wire instruction mode.
+  QUADSPI-&gt;CCR  |=  ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos );
+  // Enable the peripheral and send the 'write enable' command.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR |=  ( 0x06 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // Wait for the transaction to finish.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  // Disable the peripheral.
+  QUADSPI-&gt;CR   &amp;= ~( QUADSPI_CR_EN );
+  // Wait until 'writes enabled' is set in the config register.
+  qspi_reg_wait( 0x05, 0x43, 0x42 );
+}</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class="co1">// Enable writes on the QSPI Flash. Must be done before every</span><span class="co1"></span></li><li class=" even"><span class="co1">// erase / program operation.</span><span class=""></span></li><li class=" odd"><span class=""></span><span class="kw1">void</span><span class=""> </span><span class="de1">qspi_wen</span><span class="br0">(</span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class=""></span></li><li class=" even"><span class=""> </span><span class="co1"> // Disable the peripheral.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CR   &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Clear the instruction, mode, and transaction phases.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CCR_INSTRUCTION |</span></li><li class=" even"><span class="">                      QUADSPI_CCR_FMODE |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_IMODE |</span></li><li class=" even"><span class="">                      QUADSPI_CCR_DMODE |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_ADMODE </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Set 4-wire instruction mode.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR  |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_IMODE_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Enable the peripheral and send the 'write enable' command.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CR  |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">0x06</span><span class=""> &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Wait for the transaction to finish.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Disable the peripheral.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CR   &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Wait until 'writes enabled' is set in the config register.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="de1">qspi_reg_wait</span><span class="br0">(</span><span class=""> </span><span class="nu0">0x05</span><span class="">, </span><span class="nu0">0x43</span><span class="">, </span><span class="nu0">0x42</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""></span><span class="br0">}</span></li></ul><pre style="display: none;">// Enable writes on the QSPI Flash. Must be done before every
+// erase / program operation.
+void qspi_wen() {
+  // Disable the peripheral.
+  QUADSPI-&gt;CR   &amp;= ~( QUADSPI_CR_EN );
+  // Clear the instruction, mode, and transaction phases.
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_INSTRUCTION |
+                      QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_IMODE |
+                      QUADSPI_CCR_DMODE |
+                      QUADSPI_CCR_ADMODE );
+  // Set 4-wire instruction mode.
+  QUADSPI-&gt;CCR  |=  ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos );
+  // Enable the peripheral and send the 'write enable' command.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR |=  ( 0x06 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // Wait for the transaction to finish.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  // Disable the peripheral.
+  QUADSPI-&gt;CR   &amp;= ~( QUADSPI_CR_EN );
+  // Wait until 'writes enabled' is set in the config register.
+  qspi_reg_wait( 0x05, 0x43, 0x42 );
+}</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>Then, we can create a helper method which calls that function and sends the <code>0x20</code>
+ “erase sector” command. We also need to give it the address of the 
+sector that we want to erase, which needs to be aligned to the size of a
+ sector (4KB in this chip). So we need to enable the “instruction” and 
+“address” phases with 4 data lines each:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">// Erase a 4KB sector. Sector address = ( snum * 0x1000 )
+void qspi_erase_sector( uint32_t snum ) {
+  // Send 'enable writes' command.
+  qspi_wen();
+  // Erase the sector, and wait for the operation to complete.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_INSTRUCTION |
+                      QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_IMODE |
+                      QUADSPI_CCR_DMODE |
+                      QUADSPI_CCR_ADMODE );
+  QUADSPI-&gt;CCR |=  ( ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos ) |
+                     ( 3 &lt;&lt; QUADSPI_CCR_ADMODE_Pos ) );
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );
+  // 0x20 is the "sector erase" command.
+  QUADSPI-&gt;CCR |=  ( 0x20 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // The address is equal to the sector number * 4KB.
+  QUADSPI-&gt;AR   =  ( snum * 0x1000 );
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  // Disable the peripheral once the transaction is complete.
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  // Wait for the 'write in progress' bit to clear.
+  qspi_reg_wait( 0x05, 0x43, 0x40 );
+}</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class="co1">// Erase a 4KB sector. Sector address = ( snum * 0x1000 )</span><span class=""></span></li><li class=" even"><span class=""></span><span class="kw1">void</span><span class=""> </span><span class="de1">qspi_erase_sector</span><span class="br0">(</span><span class=""> uint32_t snum </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class=""></span></li><li class=" odd"><span class=""> </span><span class="co1"> // Send 'enable writes' command.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="de1">qspi_wen</span><span class="br0">(</span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Erase the sector, and wait for the operation to complete.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CCR_INSTRUCTION |</span></li><li class=" even"><span class="">                      QUADSPI_CCR_FMODE |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_IMODE |</span></li><li class=" even"><span class="">                      QUADSPI_CCR_DMODE |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_ADMODE </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_IMODE_Pos </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                     </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_ADMODE_Pos </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CR  |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // 0x20 is the "sector erase" command.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">0x20</span><span class=""> &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // The address is equal to the sector number * 4KB.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;AR   =  </span><span class="br0">(</span><span class=""> snum * </span><span class="nu0">0x1000</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Disable the peripheral once the transaction is complete.</span><span class=""></span></li><li class=" odd"><span class="">  QUADSPI-&gt;CR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Wait for the 'write in progress' bit to clear.</span><span class=""></span></li><li class=" odd"><span class="">  </span><span class="de1">qspi_reg_wait</span><span class="br0">(</span><span class=""> </span><span class="nu0">0x05</span><span class="">, </span><span class="nu0">0x43</span><span class="">, </span><span class="nu0">0x40</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""></span><span class="br0">}</span></li></ul><pre style="display: none;">// Erase a 4KB sector. Sector address = ( snum * 0x1000 )
+void qspi_erase_sector( uint32_t snum ) {
+  // Send 'enable writes' command.
+  qspi_wen();
+  // Erase the sector, and wait for the operation to complete.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_INSTRUCTION |
+                      QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_IMODE |
+                      QUADSPI_CCR_DMODE |
+                      QUADSPI_CCR_ADMODE );
+  QUADSPI-&gt;CCR |=  ( ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos ) |
+                     ( 3 &lt;&lt; QUADSPI_CCR_ADMODE_Pos ) );
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );
+  // 0x20 is the "sector erase" command.
+  QUADSPI-&gt;CCR |=  ( 0x20 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  // The address is equal to the sector number * 4KB.
+  QUADSPI-&gt;AR   =  ( snum * 0x1000 );
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  // Disable the peripheral once the transaction is complete.
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  // Wait for the 'write in progress' bit to clear.
+  qspi_reg_wait( 0x05, 0x43, 0x40 );
+}</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>There’s also a <code>0xD8</code> “erase block” command, which acts on 64KB blocks instead of 4KB sectors. With that done, you can call the <code>qspi_erase_sector</code>
+ function to…do that. Just remember that each sector can only be erased 
+about 10,000 – 1,000,000 times before it fails, so you should avoid 
+using Flash memory like RAM. It’s best for storing large-ish data which 
+doesn’t need to be modified very often.</p>
+<h2>Writing Data</h2>
+<p>Once you’ve erased the area of memory that you intend to write to, 
+you can write to it one byte at a time. You don’t need to send a new 
+command for every byte, but you also can’t send all of your data after a
+ single “start writing” command. The <code>MX25L512</code> Flash chip on
+ this board seems pretty industry-standard, and it is split into 
+256-byte “pages”, 4-kilobyte “sectors”, and 64-kilobyte “blocks”. Each 
+sector contains 16 pages, and each block contains 16 sectors. The size 
+of each section may change with different chip vendors or capacities, 
+but their functionality probably won’t.</p>
+<p>You can erase individual sectors or blocks, but not pages. To erase a
+ page, you have to erase the sector or block that it belongs to. 
+Similarly, you can write up to one page at a time, but you can’t write 
+to an entire sector or block in one burst. If you send a “program page” 
+command with an address that starts in the middle of a page, the chip 
+will accept data until the end of that page and “wrap around” to the 
+beginning of the page if you continue sending data. So if you want to 
+write a lot of data to a Flash chip, you’ll need to break it up into 
+“chunks” aligned to 256-byte page boundaries, and send it to the chip 
+one page at a time. You’ll also need to manually save and restore any 
+leftover data in the erased sectors which you don’t want to overwrite.</p>
+<div id="attachment_1207" style="width: 621px" class="wp-caption aligncenter"><img aria-describedby="caption-attachment-1207" class="wp-image-1207 size-full" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/flash_page_writes.png" alt="Flash Page Programming" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/flash_page_writes.png 611w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/flash_page_writes-300x65.png 300w" sizes="(max-width: 611px) 100vw, 611px" width="611" height="132"><p id="caption-attachment-1207" class="wp-caption-text">Flash
+ “Page Program” commands can only write to one page at a time. If you 
+try to write past a page boundary, the chip will wrap back to the start 
+of the page instead of proceeding to the next one.</p></div>
+<p>But the process of writing a small amount of data is very similar to 
+erasing a sector, just with the addition of the “data” phase. You enable
+ writes, set the “data length” register with the number of bytes you 
+want to send, send the <code>0x12</code> “page program with 4-byte addressing” command, then finally set the address and data registers:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">// Write one word of data (4 bytes) to a QSPI Flash chip.
+void qspi_write_word( uint32_t addr, uint32_t data ) {
+  // Send 'enable writes' command.
+  qspi_wen();
+  // Write the word of data.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_INSTRUCTION |
+                      QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_IMODE |
+                      QUADSPI_CCR_DMODE |
+                      QUADSPI_CCR_ADMODE );
+  QUADSPI-&gt;CCR |=  ( ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos ) |
+                     ( 3 &lt;&lt; QUADSPI_CCR_ADMODE_Pos ) |
+                     ( 3 &lt;&lt; QUADSPI_CCR_DMODE_Pos ) );
+  // Set data length (3 + 1 = 4 bytes).
+  QUADSPI-&gt;DLR = 3;
+  // Enable the peripheral and set instruction, address, data.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR |=  ( 0x12 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  QUADSPI-&gt;AR   =  ( addr );
+  QUADSPI-&gt;DR   =  ( data );
+  // Wait for the transaction to complete, and disable the peripheral.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  // Clear the data length register.
+  QUADSPI-&gt;DLR = 0;
+  // Wait for the 'write in progress' bit to clear.
+  qspi_reg_wait( 0x05, 0x41, 0x40 );
+}</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class="co1">// Write one word of data (4 bytes) to a QSPI Flash chip.</span><span class=""></span></li><li class=" even"><span class=""></span><span class="kw1">void</span><span class=""> </span><span class="de1">qspi_write_word</span><span class="br0">(</span><span class=""> uint32_t addr, uint32_t data </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class=""></span></li><li class=" odd"><span class=""> </span><span class="co1"> // Send 'enable writes' command.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="de1">qspi_wen</span><span class="br0">(</span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Write the word of data.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CCR_INSTRUCTION |</span></li><li class=" even"><span class="">                      QUADSPI_CCR_FMODE |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_IMODE |</span></li><li class=" even"><span class="">                      QUADSPI_CCR_DMODE |</span></li><li class=" odd"><span class="">                      QUADSPI_CCR_ADMODE </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_IMODE_Pos </span><span class="br0">)</span><span class=""> |</span></li><li class=" odd"><span class="">                     </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_ADMODE_Pos </span><span class="br0">)</span><span class=""> |</span></li><li class=" even"><span class="">                     </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_DMODE_Pos </span><span class="br0">)</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Set data length (3 + 1 = 4 bytes).</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;DLR = </span><span class="nu0">3</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Enable the peripheral and set instruction, address, data.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CR  |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR |=  </span><span class="br0">(</span><span class=""> </span><span class="nu0">0x12</span><span class=""> &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;AR   =  </span><span class="br0">(</span><span class=""> addr </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;DR   =  </span><span class="br0">(</span><span class=""> data </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""> </span><span class="co1"> // Wait for the transaction to complete, and disable the peripheral.</span><span class=""></span></li><li class=" odd"><span class="">  </span><span class="kw1">while</span><span class=""> </span><span class="br0">(</span><span class=""> QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY </span><span class="br0">)</span><span class=""> </span><span class="br0">{</span><span class="br0">}</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Clear the data length register.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;DLR = </span><span class="nu0">0</span><span class="">;</span></li><li class=" odd"><span class=""> </span><span class="co1"> // Wait for the 'write in progress' bit to clear.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="de1">qspi_reg_wait</span><span class="br0">(</span><span class=""> </span><span class="nu0">0x05</span><span class="">, </span><span class="nu0">0x41</span><span class="">, </span><span class="nu0">0x40</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class=""></span><span class="br0">}</span></li></ul><pre style="display: none;">// Write one word of data (4 bytes) to a QSPI Flash chip.
+void qspi_write_word( uint32_t addr, uint32_t data ) {
+  // Send 'enable writes' command.
+  qspi_wen();
+  // Write the word of data.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CCR  &amp;= ~( QUADSPI_CCR_INSTRUCTION |
+                      QUADSPI_CCR_FMODE |
+                      QUADSPI_CCR_IMODE |
+                      QUADSPI_CCR_DMODE |
+                      QUADSPI_CCR_ADMODE );
+  QUADSPI-&gt;CCR |=  ( ( 3 &lt;&lt; QUADSPI_CCR_IMODE_Pos ) |
+                     ( 3 &lt;&lt; QUADSPI_CCR_ADMODE_Pos ) |
+                     ( 3 &lt;&lt; QUADSPI_CCR_DMODE_Pos ) );
+  // Set data length (3 + 1 = 4 bytes).
+  QUADSPI-&gt;DLR = 3;
+  // Enable the peripheral and set instruction, address, data.
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR |=  ( 0x12 &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos );
+  QUADSPI-&gt;AR   =  ( addr );
+  QUADSPI-&gt;DR   =  ( data );
+  // Wait for the transaction to complete, and disable the peripheral.
+  while ( QUADSPI-&gt;SR &amp; QUADSPI_SR_BUSY ) {};
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  // Clear the data length register.
+  QUADSPI-&gt;DLR = 0;
+  // Wait for the 'write in progress' bit to clear.
+  qspi_reg_wait( 0x05, 0x41, 0x40 );
+}</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>If you want to write more than one word of data in a transaction, the <code>DR</code> “Data Register” connects to a 32-byte FIFO buffer inside of the chip. So you can keep writing to it as long as the <code>FTF</code> (FIFO Threshold Flag) is not set in the peripheral’s <code>SR</code>
+ “Status Register”. When that flag is set, it means that the buffer has 
+reached its “full” threshold, which is configured by the <code>FTHRES</code> field in the peripheral’s <code>CR</code> “Control Register”. The peripheral will keep accepting new data until it has sent the number of bytes specified in the <code>DLR</code> “Data Length Register”.</p>
+<p>Once you’ve added that <code>qspi_write_word</code> method, you can call it to write individual words of data to the Flash chip back in your <code>main</code> method:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Test writing some data.
+  // No need to run this every time; Flash is non-volatile, but it
+  // has limited "write endurance" on the order of ~10k-100k cycles.
+  qspi_erase_sector( 0 );
+  qspi_write_word( 0, 0x01234567 );
+  qspi_write_word( 4, 0x89ABCDEF );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Test writing some data.</span><span class=""></span></li><li class=" even"><span class=""> </span><span class="co1"> // No need to run this every time; Flash is non-volatile, but it</span><span class=""></span></li><li class=" odd"><span class=""> </span><span class="co1"> // has limited "write endurance" on the order of ~10k-100k cycles.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="de1">qspi_erase_sector</span><span class="br0">(</span><span class=""> </span><span class="nu0">0</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  </span><span class="de1">qspi_write_word</span><span class="br0">(</span><span class=""> </span><span class="nu0">0</span><span class="">, </span><span class="nu0">0x01234567</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  </span><span class="de1">qspi_write_word</span><span class="br0">(</span><span class=""> </span><span class="nu0">4</span><span class="">, </span><span class="nu0">0x89ABCDEF</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Test writing some data.
+  // No need to run this every time; Flash is non-volatile, but it
+  // has limited "write endurance" on the order of ~10k-100k cycles.
+  qspi_erase_sector( 0 );
+  qspi_write_word( 0, 0x01234567 );
+  qspi_write_word( 4, 0x89ABCDEF );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<h2>Reading Data in Memory-Mapped Mode</h2>
+<p>Once you’ve written data to the chip, you can check that everything 
+worked by reading it back. The limitations of Flash memory can make the 
+erase / write process a little bit confusing, but the read-only 
+memory-mapped mode is refreshingly easy to use.</p>
+<p>All you have to do is enable the “instruction”, “address”, and “data” phases, set the <code>INSTRUCTION</code> field to the <code>0xEC</code> “QSPI read with 4-byte addressing” command, configure the right number of “dummy cycles”, and set the <code>FMODE</code> field to <code>3</code> for “memory-mapped” mode:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Enable memory-mapped mode. MX25L512 Flash chips use
+  // 6 "dummy cycles" with Quad I/O "fast read" instructions by
+  // default, which allows up to 84MHz communication speed.
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR &amp;= ~( QUADSPI_CCR_INSTRUCTION );
+  QUADSPI-&gt;CCR |= ( 3 &lt;&lt; QUADSPI_CCR_FMODE_Pos |
+                    3 &lt;&lt; QUADSPI_CCR_ADMODE_Pos |
+                    3 &lt;&lt; QUADSPI_CCR_DMODE_Pos |
+                    3 &lt;&lt; QUADSPI_CCR_IMODE_Pos |
+                    0xEC &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos |
+                    6 &lt;&lt; QUADSPI_CCR_DCYC_Pos );
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Enable memory-mapped mode. MX25L512 Flash chips use</span><span class=""></span></li><li class=" even"><span class=""> </span><span class="co1"> // 6 "dummy cycles" with Quad I/O "fast read" instructions by</span><span class=""></span></li><li class=" odd"><span class=""> </span><span class="co1"> // default, which allows up to 84MHz communication speed.</span><span class=""></span></li><li class=" even"><span class="">  QUADSPI-&gt;CR  &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  QUADSPI-&gt;CCR &amp;= ~</span><span class="br0">(</span><span class=""> QUADSPI_CCR_INSTRUCTION </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CCR |= </span><span class="br0">(</span><span class=""> </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_FMODE_Pos |</span></li><li class=" odd"><span class="">                    </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_ADMODE_Pos |</span></li><li class=" even"><span class="">                    </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_DMODE_Pos |</span></li><li class=" odd"><span class="">                    </span><span class="nu0">3</span><span class=""> &lt;&lt; QUADSPI_CCR_IMODE_Pos |</span></li><li class=" even"><span class="">                    </span><span class="nu0">0xEC</span><span class=""> &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos |</span></li><li class=" odd"><span class="">                    </span><span class="nu0">6</span><span class=""> &lt;&lt; QUADSPI_CCR_DCYC_Pos </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  QUADSPI-&gt;CR  |=  </span><span class="br0">(</span><span class=""> QUADSPI_CR_EN </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Enable memory-mapped mode. MX25L512 Flash chips use
+  // 6 "dummy cycles" with Quad I/O "fast read" instructions by
+  // default, which allows up to 84MHz communication speed.
+  QUADSPI-&gt;CR  &amp;= ~( QUADSPI_CR_EN );
+  QUADSPI-&gt;CCR &amp;= ~( QUADSPI_CCR_INSTRUCTION );
+  QUADSPI-&gt;CCR |= ( 3 &lt;&lt; QUADSPI_CCR_FMODE_Pos |
+                    3 &lt;&lt; QUADSPI_CCR_ADMODE_Pos |
+                    3 &lt;&lt; QUADSPI_CCR_DMODE_Pos |
+                    3 &lt;&lt; QUADSPI_CCR_IMODE_Pos |
+                    0xEC &lt;&lt; QUADSPI_CCR_INSTRUCTION_Pos |
+                    6 &lt;&lt; QUADSPI_CCR_DCYC_Pos );
+  QUADSPI-&gt;CR  |=  ( QUADSPI_CR_EN );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>The number of dummy cycles will depend on the Flash chip and how you 
+configure it. Remember from when we configured the clock prescaler, our <code>MX25L512</code> chip expects 6 dummy cycles with “Quad I/O Fast Read” commands at a maximum speed of 84MHz by default.</p>
+<p>Once the peripheral is enabled with the <code>FMODE</code> field set to memory-mapped mode, you can read from the chip as if its starting address were located at <code>0x90000000</code>
+ in the chip’s internal memory space. The internal memory bank is only 
+256MB, so if you have a larger QSPI chip, you’ll only be able to access 
+its first 256MB in memory-mapped mode. But we can read the first few 
+words using the same sort of syntax that we used to read from external 
+RAM in my last post about the “Flexible Memory Controller” peripheral:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">  // Wait an extra cycle to allow the peripheral to map the memory.
+  // Not sure why, but this seems necessary.
+  __asm( "NOP" );
+
+  // Test reading values from memory-mapped Flash.
+  int val = *( ( uint32_t* ) 0x90000000 );
+  printf( "QSPI[0]: 0x%08X\r\n", val );
+  val = *( ( uint32_t* ) 0x90000002 );
+  printf( "QSPI[2]: 0x%08X\r\n", val );
+  val = *( ( uint32_t* ) 0x90000008 );
+  printf( "QSPI[8]: 0x%08X\r\n", val );</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class=""> </span><span class="co1"> // Wait an extra cycle to allow the peripheral to map the memory.</span><span class=""></span></li><li class=" even"><span class=""> </span><span class="co1"> // Not sure why, but this seems necessary.</span><span class=""></span></li><li class=" odd"><span class="">  </span><span class="de1">__asm</span><span class="br0">(</span><span class=""> </span><span class="st1">"NOP"</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class=""></span></li><li class=" odd"><span class=""> </span><span class="co1"> // Test reading values from memory-mapped Flash.</span><span class=""></span></li><li class=" even"><span class="">  </span><span class="kw1">int</span><span class=""> val = *</span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> uint32_t* </span><span class="br0">)</span><span class=""> </span><span class="nu0">0x90000000</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  </span><span class="de1">printf</span><span class="br0">(</span><span class=""> </span><span class="st1">"QSPI[0]: 0x%08X\r\n"</span><span class="">, val </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  val = *</span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> uint32_t* </span><span class="br0">)</span><span class=""> </span><span class="nu0">0x90000002</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  </span><span class="de1">printf</span><span class="br0">(</span><span class=""> </span><span class="st1">"QSPI[2]: 0x%08X\r\n"</span><span class="">, val </span><span class="br0">)</span><span class="">;</span></li><li class=" even"><span class="">  val = *</span><span class="br0">(</span><span class=""> </span><span class="br0">(</span><span class=""> uint32_t* </span><span class="br0">)</span><span class=""> </span><span class="nu0">0x90000008</span><span class=""> </span><span class="br0">)</span><span class="">;</span></li><li class=" odd"><span class="">  </span><span class="de1">printf</span><span class="br0">(</span><span class=""> </span><span class="st1">"QSPI[8]: 0x%08X\r\n"</span><span class="">, val </span><span class="br0">)</span><span class="">;</span></li></ul><pre style="display: none;">  // Wait an extra cycle to allow the peripheral to map the memory.
+  // Not sure why, but this seems necessary.
+  __asm( "NOP" );
+
+  // Test reading values from memory-mapped Flash.
+  int val = *( ( uint32_t* ) 0x90000000 );
+  printf( "QSPI[0]: 0x%08X\r\n", val );
+  val = *( ( uint32_t* ) 0x90000002 );
+  printf( "QSPI[2]: 0x%08X\r\n", val );
+  val = *( ( uint32_t* ) 0x90000008 );
+  printf( "QSPI[8]: 0x%08X\r\n", val );</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>And if you run that program on the Disco board, you should see the previously-programmed values returned:</p>
+<pre>QSPI[0]: 0x01234567
+QSPI[2]: 0xCDEF0123
+QSPI[8]: 0xFFFFFFFF</pre>
+<p>We only wrote two words of data, so the rest of the sector is set to all <code>1</code>s.
+ And remember, ARM Cortex-M chips are little-endian, so the 
+least-significant byte is located at the lowest address. That’s why 
+you’ll read <code>0xCDEF0123</code> if you access a 2-byte offset. The peripheral sent <code>0x01234567</code> as <code>0x67</code>, <code>0x45</code>, <code>0x23</code>, <code>0x01</code>. So address <code>0</code> contains <code>0x67</code>, address <code>2</code> contains <code>0x23</code>, and address <code>3</code> contains <code>0x01</code>. If you prefer to write one byte at a time to the peripheral, you can do that by accessing the <code>DR</code> “Data Register” as an 8-bit pointer:</p>
+<pre class="EnlighterJSRAW" data-enlighter-language="c" style="display: none;">*( uint8_t* )&amp;( QSPI-&gt;DR ) = 0xBA;</pre><div class="EnlighterJSWrapper wpcustomEnlighterJSWrapper"><ul class="hoverEnabled wpcustomEnlighterJS EnlighterJS"><li class=" odd"><span class="">*</span><span class="br0">(</span><span class=""> uint8_t* </span><span class="br0">)</span><span class="">&amp;</span><span class="br0">(</span><span class=""> QSPI-&gt;DR </span><span class="br0">)</span><span class=""> = </span><span class="nu0">0xBA</span><span class="">;</span></li></ul><pre style="display: none;">*( uint8_t* )&amp;( QSPI-&gt;DR ) = 0xBA;</pre><div class="EnlighterJSToolbar"><a class="EnlighterJSRawButton" title="Toggle RAW Code"></a><a class="EnlighterJSWindowButton" title="Open Code in new Window"></a><span class="clear"></span></div></div>
+<p>You can also do 16-bit writes with a <code>uint16_t*</code> pointer.</p>
+<p>Once you’ve verified that the peripheral works, you can comment out 
+the “erase sector” and “write word” logic. Flash memory is non-volatile,
+ so it retains its values even after the board is powered off. And since
+ Flash memory has limited write endurance, it’s good practice to avoid 
+writing to it when you don’t need to.</p>
+<h1>Conclusions</h1>
+<p>Well, that was a bit of a whirlwind introduction to QSPI Flash chips. As usual, you can find <a href="https://github.com/WRansohoff/STM32F723E_QSPI_Example">a full project implementing this code on GitHub</a>.</p>
+<p>Sorry if the erase / write process seemed confusing; maybe I could 
+explain this peripheral more succinctly if I didn’t also talk about the 
+limitations of generic Flash memory, but I didn’t want to assume that 
+prior knowledge. And Flash memory is <em>very</em> common, so I thought it was worth mentioning.</p>
+<p>The STM32’s internal Flash memory works the same way; it has sectors 
+and pages of memory which limit how you can erase and write to it, and 
+it will eventually fail after maybe 10,000-100,000 programming cycles. 
+USB Flash drives, SD cards, and SSDs also use Flash memory, but they 
+have their own microcontrollers which handle the erase/write logic and <a href="https://en.wikipedia.org/wiki/Wear_leveling">“wear leveling”</a>.
+ Also, a device’s write endurance will depend on what sort of Flash 
+memory is used; high-quality modern Flash might handle upwards of a 
+million erase cycles, while an old bargain-bin SD card might only be 
+capable of a few thousand.</p>
+<p>If you’re really worried about write endurance, you can buy QSPI 
+Flash chips in DIP-8 packages. Those through-hole parts can be plugged 
+into sockets or breadboards and easily replaced without any soldering. 
+But I don’t think it’s really worth worrying about unless your 
+application regularly needs to perform non-volatile writes. As an 
+example, you’d have to load a program to an STM32 five times a day for 
+over five years to reach the absolute minimum number of supported 
+erase/write cycles.</p>
+<p>In a nutshell, you should be okay if you avoid re-writing Flash 
+memory frequently. And now that you understand that, you know why 
+Tesla’s engineers should not have <a href="https://tesla-info.com/blog/tesla-mcu1-emmc-failure.php">written software to constantly log data to a car’s eMMC Flash module</a>. Unsurprisingly, that design choice led to premature failures and <a href="https://static.nhtsa.gov/odi/inv/2020/INOA-PE20010-4553.PDF">another NHTSA investigation</a>.
+ It’s a bit of a rookie mistake, but also an easy one to make, and a 
+good case study for why you should always strive to understand the basic
+ operating principle of any hardware that you use in a final design.</p>
+<p>Also, it would have been a good idea to create human-readable macros 
+for the instruction values in a header file somewhere, like <code>FLASH_WRITE_EN</code> instead of <code>0x06</code>,
+ because it’s bad practice to include unexplained “magic numbers” in 
+your code. Sorry about that, but this is just a rudimentary example and I
+ tried to explain each command which was used. You might want to verify 
+them in your Flash chip’s datasheet if you use a different brand.</p>
+																					</div>
+
+																	
+										
+
+<div id="comments" class="comments-area">
+
+			<h2 class="comments-title">
+			Comments (4):		</h2>
+
+		<ol class="commentlist">
+						<li id="comment-4208">
+				<article class="comment even thread-even depth-1 clearfix comment-holder">
+					<div class="avatar-column">
+						<header>
+							<figure class="comment-avatar">
+																<img alt="" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/535ea2ac6afcfdf9a7819d3614229f0e.jpeg" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/535ea2ac6afcfdf9a7819d3614229f0e_002.jpeg 2x" class="avatar avatar-80 photo" width="80" height="80">							</figure>
+							<h4 class="comment-heading">Raj Kumar</h4>
+							<p class="comment-date">September 1, 2020 at 10:26 pm</p>
+						</header>
+					</div>
+					<div class="comment-text">
+												<p>I want to integrate with STM32L432KC, When I am reading the W25Q16 manufacturing ID, I got 0xFF. And what could be the issue?</p>
+<p>/* SPI1 parameter configuration*/</p>
+<p>hspi1.Instance = SPI1;</p>
+<p>hspi1.Init.Mode = SPI_MODE_MASTER;</p>
+<p>hspi1.Init.Direction = SPI_DIRECTION_2LINES;</p>
+<p>hspi1.Init.DataSize = SPI_DATASIZE_8BIT;</p>
+<p>hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;</p>
+<p>hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;</p>
+<p>hspi1.Init.NSS = SPI_NSS_SOFT;</p>
+<p>hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;</p>
+<p>hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;</p>
+<p>hspi1.Init.TIMode = SPI_TIMODE_DISABLE;</p>
+<p>hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;</p>
+<p>hspi1.Init.CRCPolynomial = 10;</p>
+<p>hspi1.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;</p>
+<p>hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;</p>
+<p>if (HAL_SPI_Init(&amp;hspi1) != HAL_OK)</p>
+<p>{</p>
+<p>Error_Handler();</p>
+<p>}</p>
+<p>/ /main code</p>
+<p>void manufacturerID(void)</p>
+<p>{</p>
+<p>uint8_t ID[4];</p>
+<p>int i=0;</p>
+<p>uint8_t cmd[4] = {READ_ID_CMD,0x00,0x00,0x00};</p>
+<p>HAL_GPIO_WritePin(SPI_SEL2_GPIO_Port,SPI_SEL2_Pin,0);</p>
+<p>HAL_SPI_TransmitReceive(&amp;_W25QXX_SPI,&amp;cmd[0],&amp;ID[0],4,10);</p>
+<p>HAL_GPIO_WritePin(SPI_SEL2_GPIO_Port,SPI_SEL2_Pin,1);</p>
+<p>if((ID[0] != 0xEF) | (ID[1] != 0x17))</p>
+<p>{</p>
+<p>Error_Handler();</p>
+<p>}</p>
+<p>else</p>
+<p>{</p>
+<p>printf(“W25Qxxx ID is : “);</p>
+<p>for(i=0;i&lt;2;i++)</p>
+<p>{</p>
+<p>printf("0x%02X ",ID[i]);</p>
+<p>}</p>
+<p>printf("\r\n\r\n");</p>
+<p>}</p>
+<p>}</p>
+						<a rel="nofollow" class="comment-reply-link" href="https://vivonomicon.com/2020/08/08/bare-metal-stm32-programming-part-12-using-quad-spi-flash-memory/?replytocom=4208#respond" data-commentid="4208" data-postid="1194" data-belowelement="comment-4208" data-respondelement="respond" aria-label="Reply to Raj Kumar">Reply</a>					</div>
+				</article>
+			<ul class="children">
+			<li id="comment-4341">
+				<article class="comment byuser comment-author-vimes bypostauthor odd alt depth-2 clearfix comment-holder">
+					<div class="avatar-column">
+						<header>
+							<figure class="comment-avatar">
+																<img alt="" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/5780cfa3201927005a4af7fa81c50074.jpeg" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/5780cfa3201927005a4af7fa81c50074_002.jpeg 2x" class="avatar avatar-50 photo" width="50" height="50">							</figure>
+							<h4 class="comment-heading">Vivonomicon</h4>
+							<p class="comment-date">September 6, 2020 at 12:54 pm</p>
+						</header>
+					</div>
+					<div class="comment-text">
+												<p>Getting 0xFF is a pretty common error condition with 
+Flash, so it’s hard to say exactly. It looks like you’re trying to use 
+an ordinary SPI peripheral with the STM32Cube HAL, and this post is 
+about the Quad-SPI peripheral. Ordinary SPIs can only use one data line 
+in each direction, whereas Quad-SPI uses four bidirectional data lines.</p>
+<p>I haven’t spent too much time with the HAL, so I can’t give you a 
+definite answer. But you might try sending and receiving one byte at a 
+time instead of one word. It’s also worth checking with a logic analyzer
+ that the SPI peripheral actually sends the data; sometimes when I use 
+software-controlled CS pins with the wrong “NSS” configurations, the 
+peripheral gets confused about whether it should be on or not.</p>
+<p>I have <a href="https://vivonomicon.com/2018/06/17/drawing-to-a-small-tft-display-the-ili9341-and-stm32/">written a little bit about the STM32 SPI peripheral</a>,
+ but that post doesn’t use the HAL, and it’s about drawing to a display 
+so I didn’t talk about reading data. Maybe I should update that…</p>
+<p>Good luck!</p>
+						<a rel="nofollow" class="comment-reply-link" href="https://vivonomicon.com/2020/08/08/bare-metal-stm32-programming-part-12-using-quad-spi-flash-memory/?replytocom=4341#respond" data-commentid="4341" data-postid="1194" data-belowelement="comment-4341" data-respondelement="respond" aria-label="Reply to Vivonomicon">Reply</a>					</div>
+				</article>
+			</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+			<li id="comment-4276">
+				<article class="comment even thread-odd thread-alt depth-1 clearfix comment-holder">
+					<div class="avatar-column">
+						<header>
+							<figure class="comment-avatar">
+																<img alt="" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/5b5fb61afd3c5f30752325fbf0553b39.jpeg" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/5b5fb61afd3c5f30752325fbf0553b39_002.jpeg 2x" class="avatar avatar-80 photo" width="80" height="80">							</figure>
+							<h4 class="comment-heading">Serval</h4>
+							<p class="comment-date">September 3, 2020 at 11:13 pm</p>
+						</header>
+					</div>
+					<div class="comment-text">
+												<p>“our MX25L512 chip expects 6 dummy cycles with “Quad I/O Fast Read” commands at a maximum speed of 84MHz by default.”</p>
+<p>In some chips, we must configure an extra dummy cycle to avoid path delay issue. A calibration flow is needed.</p>
+						<a rel="nofollow" class="comment-reply-link" href="https://vivonomicon.com/2020/08/08/bare-metal-stm32-programming-part-12-using-quad-spi-flash-memory/?replytocom=4276#respond" data-commentid="4276" data-postid="1194" data-belowelement="comment-4276" data-respondelement="respond" aria-label="Reply to Serval">Reply</a>					</div>
+				</article>
+			<ul class="children">
+			<li id="comment-4340">
+				<article class="comment byuser comment-author-vimes bypostauthor odd alt depth-2 clearfix comment-holder">
+					<div class="avatar-column">
+						<header>
+							<figure class="comment-avatar">
+																<img alt="" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/5780cfa3201927005a4af7fa81c50074.jpeg" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/5780cfa3201927005a4af7fa81c50074_002.jpeg 2x" class="avatar avatar-50 photo" width="50" height="50">							</figure>
+							<h4 class="comment-heading">Vivonomicon</h4>
+							<p class="comment-date">September 6, 2020 at 12:31 pm</p>
+						</header>
+					</div>
+					<div class="comment-text">
+												<p>Good point, thank you for pointing that out. With dummy 
+cycles, it looks like you can get incorrect data if you use too many or 
+too few, so it’s definitely a good idea to double-check that value when 
+you port the code to a different board (or a different type of Flash 
+chip).</p>
+<p>I think that the SSHIFT bit in QUADSPI-&gt;CR can also help with 
+small external signal delays, but it can only wait an extra half-cycle 
+before sampling data.</p>
+						<a rel="nofollow" class="comment-reply-link" href="https://vivonomicon.com/2020/08/08/bare-metal-stm32-programming-part-12-using-quad-spi-flash-memory/?replytocom=4340#respond" data-commentid="4340" data-postid="1194" data-belowelement="comment-4340" data-respondelement="respond" aria-label="Reply to Vivonomicon">Reply</a>					</div>
+				</article>
+			</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+		</ol><!-- .commentlist -->
+
+		
+		
+	
+
+				<div class="entry-content-special-separator type-2"></div>
+	
+		<div id="respond" class="comment-respond">
+		<h3 id="reply-title" class="comment-reply-title">Leave a Reply <small><a rel="nofollow" id="cancel-comment-reply-link" href="https://vivonomicon.com/2020/08/08/bare-metal-stm32-programming-part-12-using-quad-spi-flash-memory/#respond" style="display:none;">Cancel reply</a></small></h3><form action="https://vivonomicon.com/wp-comments-post.php" method="post" id="commentform" class="comment-form"><p class="comment-notes"><span id="email-notes">Your email address will not be published.</span> Required fields are marked <span class="required">*</span></p><p class="comment-form-comment">
+				<textarea required="" placeholder="Comment*" id="comment" name="comment" cols="25" rows="4" aria-required="true"></textarea>
+			</p><p class="comment-form-author">
+				<input required="" minlength="3" maxlength="30" placeholder="Name*" id="author" name="author" type="text" size="30" aria-required="true">
+			</p>
+<p class="comment-form-email">
+				<input required="" placeholder="Email*" id="email" name="email" type="email" size="30" aria-required="true">
+			</p>
+<p class="comment-form-url">
+				<input placeholder="Website" id="url" name="url" type="url" size="30">
+			</p>
+<!-- Subscribe to Comments Reloaded version 190510 --><!-- Subscribe to comments Reloaded MP: '/comment-subscriptions/' --><!-- BEGIN: subscribe to comments reloaded --><p class="comment-form-subscriptions"><label for="subscribe-reloaded"><input style="width:30px" type="checkbox" name="subscribe-reloaded" id="subscribe-reloaded" value="yes"> Notify me of followup comments via e-mail. You can also <a href="https://vivonomicon.com/comment-subscriptions/?srp=1194&amp;srk=1bc58eb5a73ec3f3692a2bc3e7e5cf7a&amp;sra=s&amp;srsrc=f">subscribe</a> without commenting.</label></p><!-- END: subscribe to comments reloaded --><p class="form-submit"><input name="submit" type="submit" id="submit" class="submit" value="Post Comment"> <input type="hidden" name="comment_post_ID" value="1194" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+</p><p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="4586198a39"></p><p style="display: none;"></p><input type="hidden" id="ak_js" name="ak_js" value="1666148327446"></form>	</div><!-- #respond -->
+	
+</div><!-- #comments .comments-area -->
+									</div>
+	
+								</div>
+							</div>
+
+						</div>
+
+
+						<!-- related -->
+						
+							
+							
+								<div class="mauer-related-posts">
+
+									<h4 class="h4-special more-posts-heading text-center">Related posts:</h4>
+
+									
+										
+																																	<div class="row posts-row">
+													<div class="col-xs-12 col-sm-4">
+														<div class="post-card small post-1221 post type-post status-publish format-standard hentry category-stm32_baremetal_examples">	
+															<a href="https://vivonomicon.com/2020/09/10/bare-metal-stm32-programming-part-13-running-temporary-ram-programs-and-using-tightly-coupled-memories/" class="entry-thumb-link">
+																																<div class="entry-thumb-overlay"></div>
+															</a>
+															<div class="entry-meta">
+																<span class="entry-date"><a href="https://vivonomicon.com/2020/09/10/bare-metal-stm32-programming-part-13-running-temporary-ram-programs-and-using-tightly-coupled-memories/">September 10, 2020</a></span>
+																<span class="entry-cats"><a href="https://vivonomicon.com/category/stm32_baremetal_examples/" rel="category tag">STM32 Baremetal Examples</a></span>
+															</div>
+															<h1 class="entry-title"><a href="https://vivonomicon.com/2020/09/10/bare-metal-stm32-programming-part-13-running-temporary-ram-programs-and-using-tightly-coupled-memories/">“Bare Metal” STM32 Programming (Part 13): Running Temporary RAM Programs and Using Tightly-Coupled Memories</a></h1>
+															<div class="entry-excerpt">
+																<p>Up until this point, I’ve only written about embedded
+ applications which get loaded into a device’s non-volatile memory. 
+That’s how most “normal” programs work, but it’s not the only way to run
+ code on a microcontroller. There are plenty of situations where you 
+might want to run a one-off program on a device before resetting it to 
+its previous state. Maybe your microcontroller has a large firmware 
+image that takes a long time to erase and restore, or maybe you want to 
+perform a one-time data transfer between your laptop and a device which 
+is connected to your microcontroller.</p>
+<p>When you encounter those sorts of situations, you can write a program
+ to run from your microcontroller’s RAM instead of its Flash memory. 
+There are a few extra steps to be aware of, and the process of loading 
+and running the program is a bit different, but you won’t need to change
+ much in the application’s C code.</p>
+<p>In this post, I’ll try to demonstrate how and why to run code from 
+RAM with a couple of examples. First we’ll write a minimal RAM program 
+to blink an LED. Then, once we know how to load code into RAM and run 
+it, we’ll write an ephemeral program which can send a file from our 
+computer to a QSPI Flash chip connected to the microcontroller.</p>
+<p>I’ll also talk a bit about the “Tightly-Coupled Memory” segments 
+available on ARM Cortex-M7 CPUs. Those are small areas of RAM which are 
+good for storing critical realtime code thanks to their fast and 
+deterministic access speed.</p>
+<p>The target hardware will be the same <a href="https://www.st.com/en/evaluation-tools/32f723ediscovery.html">STM32F723 Discovery Kit board</a> that I used in my last two tutorials about external memories, since it is pretty affordable and it includes a QSPI Flash chip.</p>
+<div class="more-link-holder">
+			<a class="more-link ghost-button-link" href="https://vivonomicon.com/2020/09/10/bare-metal-stm32-programming-part-13-running-temporary-ram-programs-and-using-tightly-coupled-memories/">read more</a>
+		</div>
+															</div>
+														</div><!-- /.post-card -->
+													</div>
+
+																							
+																			
+										
+																																	
+													<div class="col-xs-12 col-sm-4">
+														<div class="post-card small post-1163 post type-post status-publish format-standard hentry category-stm32_baremetal_examples category-talking_to_hardware">	
+															<a href="https://vivonomicon.com/2020/07/26/bare-metal-stm32-programming-part-11-using-external-memories/" class="entry-thumb-link">
+																																<div class="entry-thumb-overlay"></div>
+															</a>
+															<div class="entry-meta">
+																<span class="entry-date"><a href="https://vivonomicon.com/2020/07/26/bare-metal-stm32-programming-part-11-using-external-memories/">July 26, 2020</a></span>
+																<span class="entry-cats"><a href="https://vivonomicon.com/category/stm32_baremetal_examples/" rel="category tag">STM32 Baremetal Examples</a>, <a href="https://vivonomicon.com/category/talking_to_hardware/" rel="category tag">Talking to Hardware</a></span>
+															</div>
+															<h1 class="entry-title"><a href="https://vivonomicon.com/2020/07/26/bare-metal-stm32-programming-part-11-using-external-memories/">“Bare Metal” STM32 Programming (Part 11): Using External Memories</a></h1>
+															<div class="entry-excerpt">
+																<p>Modern microcontrollers are amazing. They are much 
+faster and cheaper than the sort of processors that powered “real” 
+computers a few decades ago, and they’re also very power-efficient. But 
+software complexity has also grown over time, and as we humans often say
+ about ourselves as we age, it has grown in the wrong direction. 
+Developers have gotten used to having enormous reserves of memory to 
+draw from, so unless an application or library was specifically written 
+for embedded platforms, it probably won’t be able to run with the scant 
+kilobytes of RAM which are included in your average microcontroller.</p>
+<p>Fortunately, most vendors include peripherals for accessing external 
+memory when it is needed, and the STM32’s “Flexible Memory Controller” 
+is surprisingly easy to use. Unfortunately, it is not easy to design a 
+custom PCB with parallel memory modules. The interfaces use a lot of 
+signals which are susceptible to electromagnetic noise, so it is 
+important to ensure that all of the traces have the same length and 
+impedance. This is especially hard on hobbyists, because 2-layer boards 
+are not appropriate for these sorts of designs and KiCAD does not 
+support length-matching for more than two traces yet.</p>
+<p>So the target hardware for this tutorial will be <a href="https://www.st.com/en/evaluation-tools/32f723ediscovery.html">a $40 STM32F723E Discovery Kit</a>.
+ It is a bit more expensive than the minimal “Nucleo” boards, but it 
+includes 512KB of external RAM and a 240×240-pixel TFT display; we’ll 
+learn how to drive both of those from the FMC peripheral in this post. 
+It also includes 64MB of memory-mapped QSPI Flash memory, which I’ll 
+talk about in a future post.</p>
+<div id="attachment_1183" style="width: 613px" class="wp-caption aligncenter"><img aria-describedby="caption-attachment-1183" class="wp-image-1183" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/fps_display.png" alt="FPS Display" srcset="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/fps_display.png 768w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/fps_display-300x181.png 300w, %E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/fps_display-680x410.png 680w" sizes="(max-width: 603px) 100vw, 603px" width="603" height="363"><p id="caption-attachment-1183" class="wp-caption-text">We’ll use the external RAM to store a framebuffer, which will be sent to the display using DMA.</p></div>
+<p>This evaluation board uses BGA parts, which are almost impossible to 
+solder without special equipment. But it provides an easy and affordable
+ way to learn about writing software for these peripherals. When you are
+ ready to use external memories in homemade designs, you can use QFP 
+STM32s with at least 144 pins, TSSOP memory chips, and a 4-layer PCB.</p>
+<div class="more-link-holder">
+			<a class="more-link ghost-button-link" href="https://vivonomicon.com/2020/07/26/bare-metal-stm32-programming-part-11-using-external-memories/">read more</a>
+		</div>
+															</div>
+														</div><!-- /.post-card -->
+													</div>
+
+																							
+																			
+										
+																																	
+													<div class="col-xs-12 col-sm-4">
+														<div class="post-card small post-1037 post type-post status-publish format-standard hentry category-stm32_baremetal_examples category-talking_to_hardware">	
+															<a href="https://vivonomicon.com/2020/06/28/bare-metal-stm32-programming-part-10-uart-communication/" class="entry-thumb-link">
+																																<div class="entry-thumb-overlay"></div>
+															</a>
+															<div class="entry-meta">
+																<span class="entry-date"><a href="https://vivonomicon.com/2020/06/28/bare-metal-stm32-programming-part-10-uart-communication/">June 28, 2020</a></span>
+																<span class="entry-cats"><a href="https://vivonomicon.com/category/stm32_baremetal_examples/" rel="category tag">STM32 Baremetal Examples</a>, <a href="https://vivonomicon.com/category/talking_to_hardware/" rel="category tag">Talking to Hardware</a></span>
+															</div>
+															<h1 class="entry-title"><a href="https://vivonomicon.com/2020/06/28/bare-metal-stm32-programming-part-10-uart-communication/">“Bare Metal” STM32 Programming (Part 10): UART Communication</a></h1>
+															<div class="entry-excerpt">
+																<p>If you’ve been reading <a href="https://vivonomicon.com/category/stm32_baremetal_examples/">the posts about STM32s that I’ve been writing</a>, I owe you an apology. Usually when people write microcontroller tutorials, <code>UART</code>
+ is one of the first peripherals that they talk about, and I’ve gone far
+ too long without mentioning it. It is such a fundamental peripheral 
+that I vaguely thought I’d already written about it until I got a couple
+ of comments asking about it, so thank you for those reminders!</p>
+<p><a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter"><code>UART</code> stands for “Universal Asynchronous Receiver / Transmitter”</a>, and it is a very simple serial communication interface. In its most basic form, it only uses two data signals: “Receive” (<code>RX</code>) and “Transmit” (<code>TX</code>).
+ Since it is asynchronous (no clock signal), both devices need to use 
+the same “baud rate”, which is basically the transmission frequency 
+measured in Hertz. If you have a baud rate of 9600, then you expect a 
+new bit every 1 / 9600 of a second. (But technically, your actual 
+transmission frequency will be slightly lower than the baud rate, 
+because the standard includes extra “control” bits which are sent in 
+addition to the actual data.)</p>
+<p>One of the most common uses of <code>UART</code> is to transmit strings of text or binary data between devices. That, combined with the availability of cheap off-the-shelf <code>USB / UART</code> bridges, makes it a popular way to add some interactivity and a working <code>printf(...)</code> function to bare-metal applications.</p>
+<p>And while a simple 2-wire <code>UART</code> connection is reliable enough for most purposes, there is also an extended <code>USART</code>
+ standard which adds an optional “clock” line to synchronize the two 
+devices’ timing; the extra “S” stands for “Synchronous”. The standards 
+are otherwise very similar, so you might see <code>UART</code> and <code>USART</code>
+ used interchangeably in some places. There are also a set of extra 
+“flow control” signals, but I’m not going to talk about those or <code>USART</code> functionality in this post.</p>
+<p>I will cover a few basic ways to use the STM32 <code>UART</code> peripherals, though:</p>
+<ul>
+<li>Setting up the <code>UART</code> peripheral to send / receive data one byte at a time.</li>
+<li>Implementing the C standard library’s <code>printf(...)</code> function to send text strings over <code>UART</code></li>
+<li>Using interrupts to receive data as it arrives.</li>
+<li>Setting up a “ring buffer” to handle continuous data reception.</li>
+</ul>
+<p>If any of that sounds interesting, keep reading! The target hardware will be either an <code>STM32L432KC</code> “Nucleo-32” board or an <code>STM32F103C8</code>
+ “pill” board; they cost around $11 or $2-5 respectively. The “Nucelo” 
+boards are easier to use, because they include a debugger. If you use a 
+“pill” board, you’ll also need an <code>ST-LINK</code> debugger and a <code>USB / UART</code> bridge such as a <code>CP2102</code> board. And <a href="https://github.com/WRansohoff/STM32_UART_Examples">these examples are all available in a GitHub repository</a>, if you just want a quick reference.</p>
+<div class="more-link-holder">
+			<a class="more-link ghost-button-link" href="https://vivonomicon.com/2020/06/28/bare-metal-stm32-programming-part-10-uart-communication/">read more</a>
+		</div>
+															</div>
+														</div><!-- /.post-card -->
+													</div>
+
+												</div><!-- /.posts-row -->											
+																				
+								</div>
+
+							
+												<!-- related end -->
+
+
+					</div>
+				</div>
+
+			
+			
+	</div><!-- /.container -->
+</div><!-- /.section-main-content -->
+
+
+<div id="footer" class="section-footer" style="height: 35px;">
+	<div class="footer-wrapper">
+
+		
+		<div class="footer-pane">
+
+			
+
+			<div class="container">
+				<div class="row">
+					<div class="col-xs-12">
+												<div class="copyright text-center">© 2022 Vivonomicon, LLC - this blog represents my own viewpoints and not those of my employer</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		
+	</div>
+</div>
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="pswp__bg"></div>
+	<div class="pswp__scroll-wrap">
+
+		<div class="pswp__container">
+			<div class="pswp__item"></div>
+			<div class="pswp__item"></div>
+			<div class="pswp__item"></div>
+		</div>
+
+		<div class="pswp__ui pswp__ui--hidden">
+			<div class="pswp__top-bar">
+				<div class="pswp__counter"></div>
+				<button class="pswp__button pswp__button--close" title="Close (Esc)"></button> 
+				<button class="pswp__button pswp__button--share" title="Share"></button>
+				<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+				<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+				<div class="pswp__preloader">
+					<div class="pswp__preloader__icn">
+						<div class="pswp__preloader__cut">
+							<div class="pswp__preloader__donut"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+				<div class="pswp__share-tooltip"></div> 
+			</div>
+			<button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+			</button>
+			<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+			</button>
+			<div class="pswp__caption">
+				<div class="pswp__caption__center"></div>
+			</div>
+		</div>
+	</div>
+</div><script type="text/javascript">
+/* <![CDATA[ */
+var wpcf7 = {"apiSettings":{"root":"https:\/\/vivonomicon.com\/wp-json\/contact-form-7\/v1","namespace":"contact-form-7\/v1"}};
+/* ]]> */
+</script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/scripts.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/bootstrap.min.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/general.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/rem.min.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/photoswipe.min.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/photoswipe-ui-default.min.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/photoSwipeGalleryBuilder.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/instafeed.min.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/placeholders.min.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/comment-reply.min.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/mootools-core-yc.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/EnlighterJS.min.js"></script>
+<script type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/wp-embed.min.js"></script>
+<script async="async" type="text/javascript" src="%E2%80%9CBare%20Metal%E2%80%9D%20STM32%20Programming%20(Part%2012)%20Using%20Quad-SPI%20Flash%20Memory%20%E2%80%93%20Vivonomicon's%20Blog_files/form.js"></script>
+<script type="text/javascript">/* <![CDATA[ */EnlighterJS_Config = {"selector":{"block":"pre.EnlighterJSRAW","inline":"code.EnlighterJSRAW"},"language":"c","theme":"wpcustom","indent":2,"hover":"hoverEnabled","showLinenumbers":false,"rawButton":true,"infoButton":false,"windowButton":true,"rawcodeDoubleclick":false,"grouping":true,"cryptex":{"enabled":false,"email":"mail@example.tld"}};!function(){var a=function(a){var b="Enlighter Error: ";console.error?console.error(b+a):console.log&&console.log(b+a)};return window.addEvent?"undefined"==typeof EnlighterJS?void a("Javascript Resources not loaded yet!"):"undefined"==typeof EnlighterJS_Config?void a("Configuration not loaded yet!"):void window.addEvent("domready",function(){EnlighterJS.Util.Init(EnlighterJS_Config.selector.block,EnlighterJS_Config.selector.inline,EnlighterJS_Config)}):void a("MooTools Framework not loaded yet!")}();;/* ]]> */</script>
+
+</body></html>
